@@ -1,0 +1,58 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+
+export default new VueRouter({
+    mode: 'history',
+    base: 'office',
+    routes: [
+        { 
+            path: '/', 
+            component: () => import('../../components/layout/index.vue'),
+            children: [
+                {
+                    path: '/apply', 
+                    name: 'apply-page', 
+                    meta: { title: '申请管理', role: 'apply', icon: 'menu_apply_icon' }, 
+                    component: () => import('./views/apply.vue')
+                },
+                {
+                    path: '/apply/add',
+                    name: 'apply-add-page',
+                    meta: { title: '申请新增', role: 'apply', icon: 'menu_apply_icon' },
+                    component: () => import('./views/apply-info.vue')
+                },
+                {
+                    path: '/apply/add',
+                    name: 'apply-edit-page',
+                    meta: { title: '编辑申请', role: 'apply', icon: 'menu_apply_icon' },
+                    component: () => import('./views/apply-info.vue')
+                },
+                {
+                    path: '/apply/add',
+                    name: 'apply-view-page',
+                    meta: { title: '详情', role: 'apply', icon: 'menu_apply_icon' },
+                    component: () => import('./views/apply-info.vue')
+                },
+                {
+                    path: '/personnel',
+                    name: 'personnel-page',
+                    meta: { title: '人事架构', role: 'personnel', icon: 'menu_personnel_icon' },
+                    component: () => import('./views/personnel.vue')
+                },
+                {
+                    path: '/personnel/view',
+                    name: 'personnel-view-page',
+                    meta: { title: '人员详情', role: 'personnel', icon: 'menu_personnel_icon' },
+                    component: () => import('./views/personnel-info.vue')
+                },
+                {
+                    path: '/personnel/edit',
+                    name: 'personnel-edit-page',
+                    meta: { title: '人员编辑', role: 'personnel', icon: 'menu_personnel_icon' },
+                    component: () => import('./views/personnel-info.vue')
+                },
+            ]
+        },
+    ]
+})

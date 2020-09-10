@@ -1,0 +1,5 @@
+/* 编辑器内部 iframe 样式 */
+.ke-content {
+    background-color: #fff;
+    padding: 0px 94.4867px
+}

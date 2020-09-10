@@ -1,0 +1,219 @@
+{
+  "id": "2024218",
+  "name": "世纪国瑞管理系统",
+  "font_family": "iconfont",
+  "css_prefix_text": "",
+  "description": "前OA系统重构",
+  "glyphs": [
+    {
+      "icon_id": "10831409",
+      "name": "报价",
+      "font_class": "menu_baojia_icon",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
+      "icon_id": "11192310",
+      "name": "询价",
+      "font_class": "menu_xunjia_icon",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "2456404",
+      "name": "pdf",
+      "font_class": "pdf_icon",
+      "unicode": "e68d",
+      "unicode_decimal": 59021
+    },
+    {
+      "icon_id": "13406074",
+      "name": "mp4",
+      "font_class": "mp4_icon",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
+      "icon_id": "4577234",
+      "name": "mp3",
+      "font_class": "mp3_icon",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "4628493",
+      "name": "ZIP",
+      "font_class": "zip_icon",
+      "unicode": "e63e",
+      "unicode_decimal": 58942
+    },
+    {
+      "icon_id": "4628497",
+      "name": "WORD",
+      "font_class": "word_icon",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "4628501",
+      "name": "ECEL",
+      "font_class": "excel_icon",
+      "unicode": "e643",
+      "unicode_decimal": 58947
+    },
+    {
+      "icon_id": "1766817",
+      "name": "人事管理",
+      "font_class": "menu_personnel_icon",
+      "unicode": "e644",
+      "unicode_decimal": 58948
+    },
+    {
+      "icon_id": "12470964",
+      "name": "申请管理",
+      "font_class": "menu_apply_icon",
+      "unicode": "e611",
+      "unicode_decimal": 58897
+    },
+    {
+      "icon_id": "15667648",
+      "name": "审批管理",
+      "font_class": "menu_approval_icon",
+      "unicode": "e6ef",
+      "unicode_decimal": 59119
+    },
+    {
+      "icon_id": "2267999",
+      "name": "审批",
+      "font_class": "menu_shenpi_icon",
+      "unicode": "e65f",
+      "unicode_decimal": 58975
+    },
+    {
+      "icon_id": "7157708",
+      "name": "货物",
+      "font_class": "menu_huowu_icon",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "171822",
+      "name": "办公",
+      "font_class": "icon-bangong-system",
+      "unicode": "e693",
+      "unicode_decimal": 59027
+    },
+    {
+      "icon_id": "8187499",
+      "name": "平台",
+      "font_class": "icon-pingtai-system",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "9986014",
+      "name": "财务",
+      "font_class": "icon-caiwu-system",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "10807566",
+      "name": "仓储",
+      "font_class": "icon-cangchu-system",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "6446902",
+      "name": "部门",
+      "font_class": "icon-bumen",
+      "unicode": "e679",
+      "unicode_decimal": 59001
+    },
+    {
+      "icon_id": "8227534",
+      "name": "平台",
+      "font_class": "icon-pingtai",
+      "unicode": "e68a",
+      "unicode_decimal": 59018
+    },
+    {
+      "icon_id": "9735167",
+      "name": "公司",
+      "font_class": "icon-gongsi",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
+      "icon_id": "5822054",
+      "name": "高级搜索",
+      "font_class": "icon-highsearch",
+      "unicode": "e6a6",
+      "unicode_decimal": 59046
+    },
+    {
+      "icon_id": "395421",
+      "name": "系统参数",
+      "font_class": "menu_params_icon",
+      "unicode": "e71c",
+      "unicode_decimal": 59164
+    },
+    {
+      "icon_id": "2510586",
+      "name": "退出",
+      "font_class": "icon-logout",
+      "unicode": "e66a",
+      "unicode_decimal": 58986
+    },
+    {
+      "icon_id": "10259465",
+      "name": "修改密码",
+      "font_class": "icon-password",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "11038608",
+      "name": "数据字典",
+      "font_class": "menu_dictionary_icon",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "3796163",
+      "name": "用户管理",
+      "font_class": "menu_user_icon",
+      "unicode": "e668",
+      "unicode_decimal": 58984
+    },
+    {
+      "icon_id": "4443829",
+      "name": "菜单管理",
+      "font_class": "menu-menu-icon",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "7044898",
+      "name": "角色管理",
+      "font_class": "menu_role_icon",
+      "unicode": "e776",
+      "unicode_decimal": 59254
+    },
+    {
+      "icon_id": "10339455",
+      "name": "操作日志",
+      "font_class": "menu_management_icon",
+      "unicode": "e6bf",
+      "unicode_decimal": 59071
+    },
+    {
+      "icon_id": "14582097",
+      "name": "组织架构",
+      "font_class": "menu_unit_icon",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    }
+  ]
+}

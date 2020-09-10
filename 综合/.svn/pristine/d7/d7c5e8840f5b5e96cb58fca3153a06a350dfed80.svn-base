@@ -1,0 +1,106 @@
+<template>
+    <div class="params-page page-container">
+        <div class="page-search clearfix">
+            <el-input v-model="searchOptions.name" size="mini" class="p-s-input" placeholder="请输入参数名称" clearable></el-input>
+            <el-button type="primary" size="mini" class="p-s-btn" @click="getList">搜索</el-button>
+            <div class="p-s-btn-right">
+                <el-button type="success" size="mini" title="新增申请" @click="add('1')">新增申请</el-button>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="page-content-scroll-warp">
+                <el-scrollbar class="scroll-wrap">
+                    <el-table
+                            :data="tableData"
+                            style="width: 100%"
+                            header-cell-class-name="custom-el-table-header-class"
+                            cell-class-name="custom-el-table-cell-class-name"
+                            @selection-change="handleSelectionChange"
+                    >
+                        <el-table-column align="center" type="selection"  v-model.trim="multipleSelection" width="55"></el-table-column>
+                        <el-table-column
+                                align="center"
+                                type="index"
+                                fixed
+                                :index="$indexMethod(0,searchOptions.currentPage,searchOptions.pageSize)"
+                                label="序号"
+                                width="80"
+                        ></el-table-column>
+                        <el-table-column align="center" prop="applyTypeLabel" label="申请类型" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="startTime" label="开始时间" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="endTime" label="结束时间" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="content" label="内容" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" label="审批状态" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                <span class="el_table_row_active_text info" v-if="scope.row.checkType == '1'">{{scope.row.checkTypeLabel}}</span>
+                                <span class="el_table_row_active_text wraning" v-if="scope.row.checkType == '2'">{{scope.row.checkTypeLabel}}</span>
+                                <span class="el_table_row_active_text danger" v-if="scope.row.checkType == '3'">{{scope.row.checkTypeLabel}}</span>
+                                <span class="el_table_row_active_text success" v-if="scope.row.checkType == '4'">{{scope.row.checkTypeLabel}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" label="操作">
+                            <template slot-scope="scope">
+                                <el-link  @click="viewInfo(scope.row,'edit')" :underline="false" type="warning">编辑</el-link>
+                                <el-divider direction="vertical"></el-divider>
+                                <el-link  @click="viewInfo(scope.row,'view')" :underline="false" type="info">详情</el-link>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页器 -->
+                    <div class="page-pagination">
+                        <pagination-comp @currentChange="currentChange" :currentPage="searchOptions.currentPage" :total="searchOptions.total" />
+                    </div>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    import applyApi from "@/api/apply-api";
+    export default {
+        name: 'params-page',
+        data() {
+            return {
+                multipleSelection: [],
+                searchOptions: {
+                    currentPage: 1, //当前页码
+                    pageSize: 20, //每页显示条数
+                    total: 0,
+                    applyType:"",
+                },
+                tableData: []
+            }
+        },
+        created() {
+            this.getList()
+        },
+        methods: {
+            //查询列表
+            getList() {
+                applyApi.getList(this.searchOptions).then( res => {
+                    this.tableData = res.data.data.list;
+                    this.searchOptions.total=res.data.data.total;
+                }).catch(function (res) {
+                    console.log(res);
+                });
+            },
+            currentChange(val) {
+                this.searchOptions.currentPage = val;
+                this.getList();
+            },
+            /* table 选择 */
+            handleSelectionChange(rows){
+                this.multipleSelection = rows;
+            },
+            //新增申请
+            add(val) {
+                this.$router.push({name: 'apply-add-page', query: {type:'add',applyType:val}})
+            },
+            /* 申请编辑 或者详情*/
+            viewInfo(row,type) {
+                this.$router.push({name: 'apply-'+type+'-page', query: { type:type, id: row.id,applyType: row.applyType}})
+            },
+
+        }
+    }
+</script>

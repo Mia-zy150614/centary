@@ -1,0 +1,43 @@
+import http from './http'
+import sessionUtil from './session-util'
+import { BASE_SERVER_API, FILE_SERVER_APP } from '../config/http-url'
+
+
+export const baseServer = (url, data = null) => {
+    return http({
+        url: `${BASE_SERVER_API}${url}`,
+        method: "POST",
+        data
+    })
+}
+
+export const filesLoader = (type, params_str) => {
+    let ssoTemp = sessionUtil.getSession('ssoTemp')
+    let data = Object.assign(JSON.parse(Base64.decode(ssoTemp)), data)
+    let user_token = '';
+    if (typeof data === 'object') {
+        for (let i in data) {
+            user_token += `${i}=${data[i]}&`
+        }
+    }
+    return FILE_SERVER_APP + `/${type}?${user_token}${params_str}`
+}
+
+// 导出excel
+export  const downloadServer = (url, data = null) => {
+    return http({
+        url: `${BASE_SERVER_API}${url}`,
+        method: 'POST',
+        responseType: 'blob',
+        data
+    })
+}
+
+// 文件服务器的api
+export const fileServer = (url, data = null) => {
+    return http({
+        url: `${FILE_SERVER_APP}${url}`,
+        method: "POST",
+        data
+    })
+}

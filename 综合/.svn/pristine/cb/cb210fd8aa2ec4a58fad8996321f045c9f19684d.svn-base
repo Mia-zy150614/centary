@@ -1,0 +1,960 @@
+<template>
+    <div class="page-container page-info">
+        <div class="scroll-wrap">
+			<el-scrollbar class="scroll-wrap-bar">
+                <div class="p-i-section">
+                    <!-- 报价单 -->
+                    <div class="q-goods-container" v-show="!isAdd">
+                        <div class="q-header">
+                            <el-input class="info-input" v-model="name" placeholder="请输入报价单名称" size="mini" clearable></el-input>
+                            <el-button size="mini" type="primary" @click="createQuotation">生成报价单</el-button>
+                            <el-button size="mini" type="warning">插入合同</el-button>
+                            <span class="error-info" v-show="!name">* 报价单名称必填</span>
+                            <div class="p-s-btn-right" style="float: right">
+                                <el-button class="info-button" size="mini" type="success" @click="addGoodsBtnClick">添加货物</el-button>
+                                <el-button class="info-button" size="mini" type="warning" @click="clearCacheGoods('cb')" :disabled="qgoodsList.length === 0">清空货物列表</el-button>
+                                <el-button class="info-button" size="mini" type="danger" @click="back">返回报价管理</el-button>
+                            </div>
+                        </div>
+                        <div class="info-warp clearfix">
+                            <h3 class="title" :style="{color: showTotalsalesPriceColor}">报价：{{showTotalsalesPrice || 0}} 元</h3>
+                            <div class="discount-wrap" v-show="totalsalesPrice > 0">
+                                <el-link :underline="false" type="primary">优惠：</el-link>
+                                <el-input style="width: 120px" class="discount-input" clearable size="mini" v-model="discount" @input="discountChange" placeholder="折扣: 1 ~ 10"></el-input>
+                                <el-input style="width: 120px" class="discount-input" clearable size="mini" v-model="allowance" @input="allowanceChange" placeholder="优惠价"></el-input>
+                            </div>
+                        </div>
+                        <div class="q-goods-list">
+                            <el-table 
+                                :data="qgoodsList" 
+                                style="width: 100%"
+                                header-cell-class-name="custom-el-table-header-class"
+                                cell-class-name="custom-el-table-cell-class-name"
+                            >
+                                <el-table-column
+                                    align="center"
+                                    type="index"
+                                    :index="$indexMethod(0)"
+                                    label="序号"
+                                    width="80"
+                                ></el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="bigType"
+                                    show-overflow-tooltip
+                                    label="大类类型">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="name"
+                                    show-overflow-tooltip
+                                    width="180"
+                                    label="货物名称">
+                                    <template slot-scope="scope">
+                                        <el-popover placement="right" trigger="hover" width="800">
+                                            <el-link type="primary" slot="reference" :underline="false">{{scope.row.name}}</el-link>
+                                            <div class="goods-popover">
+                                                <table class="organization-table" width="100%" borderColor="#eeeeee" cellspacing='0' cellpadding="5" border="1">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="t-header-th" align="center" colspan="2">货物信息表</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th width="20%">大类类型</th>
+                                                            <td>{{scope.row.bigType || '-'}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">货物名称</th>
+                                                            <td>{{scope.row.name || '-'}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">型号</th>
+                                                            <td>{{scope.row.type || '-'}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">款式</th>
+                                                            <td>{{scope.row.design || '-'}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">销售单价(元)</th>
+                                                            <td>{{scope.row.salesPrice || '-'}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">单位</th>
+                                                            <td>{{scope.row.unit || '-'}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">录入时间</th>
+                                                            <td>{{scope.row.enterTime || '-'}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">图片</th>
+                                                            <td>
+                                                                <viewimg-comp :options="{image: scope.row.goodsImgStr, smallImgShow: true, imgHeight: '60px'}" />
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">产品资料</th>
+                                                            <td>
+                                                                <viewimg-comp :options="{image: scope.row.productImgStr, smallImgShow: true, imgHeight: '60px'}" />
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">投标参数</th>
+                                                            <td>
+                                                                <el-input type='textarea' size="mini" v-model="scope.row.tenderParams" readonly placeholder="-" autocomplete="off"></el-input>
+                                                                <!-- {{scope.row.tenderParams || '-'}} -->
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th width="20%">招标参数</th>
+                                                            <td>
+                                                                <!-- {{scope.row.bidsParams || '-'}} -->
+                                                                <el-input type='textarea' size="mini" v-model="scope.row.bidsParams" readonly placeholder="-" autocomplete="off"></el-input>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </el-popover>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="type"
+                                    show-overflow-tooltip
+                                    label="型号">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="design"
+                                    show-overflow-tooltip
+                                    label="款式">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="number"
+                                    show-overflow-tooltip
+                                    width="100px"
+                                    label="数量">
+                                    <template slot-scope="scope">
+                                        <el-input :class="['goods-number', scope.row.number==0 || !/^\d+$/.test(scope.row.number)?'error': null]" size="mini" v-model.number="scope.row.number" placeholder="数量" clearable @input="goodsNumber"></el-input>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="unit"
+                                    show-overflow-tooltip
+                                    label="单位">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="salesPrice"
+                                    show-overflow-tooltip
+                                    width="140"
+                                    label="销售单价(元)">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="goodsImgStr"
+                                    width="120"
+                                    label="图片">
+                                    <template slot-scope="scope">
+                                        <viewimg-comp :options="{image: scope.row.goodsImgStr, smallImgShow: true, imgHeight: '20px'}" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="productImgStr"
+                                    width="120"
+                                    label="产品资料">
+                                    <template slot-scope="scope">
+                                        <viewimg-comp :options="{image: scope.row.productImgStr, smallImgShow: true, imgHeight: '20px'}" />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="tenderParams"
+                                    show-overflow-tooltip
+                                    label="投标参数">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="bidsParams"
+                                    show-overflow-tooltip
+                                    label="招标参数">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="orderNum"
+                                    show-overflow-tooltip
+                                    label="优先等级">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="dangerNum"
+                                    show-overflow-tooltip
+                                    label="风险等级">
+                                </el-table-column>
+                                <el-table-column
+                                    align="center"
+                                    prop="enterTime"
+                                    show-overflow-tooltip
+                                    label="录入时间">
+                                </el-table-column>
+                                <el-table-column align="center" label="操作" width="160">
+                                    <template slot-scope="scope">
+                                        <el-link  @click.stop="del(scope.row)" :underline="false" type="danger">删除</el-link>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                    <!-- 所有货物列表 -->
+                    <div class="all-goods-container" v-show="isAdd">
+                        <div class="all-goods-search clearfix">
+                            <el-input class="info-input" size="mini" v-model="allgoodsSearch.goodsName" placeholder="请输入货物名称" clearable></el-input>
+                            <el-button class="info-button" size="mini" type="primary" @click="allgetGoodsList">搜索</el-button>
+                            <el-popover placement="bottom-start" width="600" trigger="click" popper-class="high-search-popover" ref="high-search-popover">
+                                <el-button :type="isHighSearch?'primary': null" size="mini" slot="reference" class="p-s-high-search">
+                                    <svg class="icon-svg" aria-hidden="true">
+                                        <use xlink:href="#icon-highsearch"></use>
+                                    </svg>
+                                    <span>高级搜索</span>
+                                </el-button>
+                                <div class="high-search-content">
+                                    <el-form ref="high-search-popover-form" label-width="80px" :model="allgoodsSearch" :rules="allgoodsSearchRules" label-position="right" class="high-search-popover-form">
+                                        <el-form-item label="货物名称：" prop="goodsName" >
+                                            <el-input size="mini" v-model.trim="allgoodsSearch.goodsName" placeholder="请输入货物名称" clearable></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="大类类型：" prop="bigType">
+                                            <el-input size="mini" v-model.trim="allgoodsSearch.bigType" placeholder="请输入大类类型" clearable></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="型号：" prop="type">
+                                            <el-input size="mini" v-model.trim="allgoodsSearch.type" placeholder="请输入型号" clearable></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="款式：" prop="design">
+                                            <el-input size="mini" v-model.trim="allgoodsSearch.design" placeholder="请输入款式" clearable></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="销售价：">
+                                            <div class="el-input-interval">
+                                                <el-form-item prop="startSalesPrice" class="el-input-interval-inner" :rules="allgoodsSearchRules.startSalesPrice">
+                                                    <el-input  size="mini" v-model.trim="allgoodsSearch.startSalesPrice" placeholder="最低价" clearable></el-input>
+                                                </el-form-item>
+                                                <div class="input-line" style="text-align: center">~</div>
+                                                <el-form-item prop="endSalesPrice" class="el-input-interval-inner" :rules="allgoodsSearchRules.endSalesPrice">
+                                                    <el-input  size="mini" v-model.trim="allgoodsSearch.endSalesPrice" placeholder="最高价" clearable></el-input>
+                                                </el-form-item>
+                                            </div>
+                                        </el-form-item>
+                                        <el-form-item label="时间：" prop="time">
+                                            <el-date-picker
+                                            style="width: 100%"
+                                                v-model="allgoodsSearch.time"
+                                                type="daterange"
+                                                size="mini"
+                                                range-separator="-"
+                                                value-format="yyyy-MM-dd"
+                                                start-placeholder="开始日期"
+                                                end-placeholder="结束日期">
+                                            </el-date-picker>
+                                        </el-form-item>
+                                        <el-form-item label="投标参数：" prop="tenderParams">
+                                            <el-input size="mini" v-model.trim="allgoodsSearch.tenderParams" placeholder="请输入投标参数" clearable></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="招标参数：" prop="bidsParams">
+                                            <el-input size="mini" v-model.trim="allgoodsSearch.bidsParams" placeholder="请输入招标参数" clearable></el-input>
+                                        </el-form-item>
+                                    </el-form>
+                                    <div class="high-search-popover-form-submit">
+                                        <el-button type="primary" size="mini" class="p-s-btn" @click="$hideSubmit(allgetGoodsList, $refs['high-search-popover'])">确定</el-button>
+                                        <el-button type="info" size="mini" class="p-s-btn" @click="$hideReset($refs['high-search-popover-form'].resetFields)">重置</el-button>
+                                    </div>
+                                </div>
+                            </el-popover>
+                            <el-button type="primary" size="mini" class="info-button" @click="outerVisible = true">批量搜索</el-button>
+                            <div class="p-s-btn-right" style="float: right">
+                                <el-button class="info-button" size="mini" type="warning" @click="saveToQuotation">添加到报价单</el-button>
+                                <el-button class="info-button" size="mini" type="info" @click="backQuotation">返回报价单</el-button>
+                            </div>
+                        </div>
+                        <el-table 
+                            ref="goodslist"
+                            :data="goodsList" 
+                            style="width: 100%"
+                            header-cell-class-name="custom-el-table-header-class"
+                            cell-class-name="custom-el-table-cell-class-name"
+                            @selection-change="allGoodsSelectionChange"
+                        >
+                            <el-table-column align="center" type="selection" fixed="left"  v-model.trim="allGoodsmultipleSelection" width="55"></el-table-column>
+                            <el-table-column
+                                align="center"
+                                type="index"
+                                fixed="left"
+                                :index="$indexMethod(0)"
+                                label="序号"
+                                width="80"
+                            ></el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="bigType"
+                                show-overflow-tooltip
+                                label="大类类型">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="name"
+                                show-overflow-tooltip
+                                width="180"
+                                label="货物名称">
+                                <template slot-scope="scope">
+                                    <el-popover placement="right" trigger="hover" width="800">
+                                        <el-link type="primary" slot="reference" :underline="false">{{scope.row.name}}</el-link>
+                                        <div class="goods-popover">
+                                            <table class="organization-table" width="100%" borderColor="#eeeeee" cellspacing='0' cellpadding="5" border="1">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="t-header-th" align="center" colspan="2">货物信息表</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th width="20%">大类类型</th>
+                                                        <td>{{scope.row.bigType || '-'}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">货物名称</th>
+                                                        <td>{{scope.row.name || '-'}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">型号</th>
+                                                        <td>{{scope.row.type || '-'}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">款式</th>
+                                                        <td>{{scope.row.design || '-'}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">销售单价(元)</th>
+                                                        <td>{{scope.row.salesPrice || '-'}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">单位</th>
+                                                        <td>{{scope.row.unit || '-'}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">录入时间</th>
+                                                        <td>{{scope.row.enterTime || '-'}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">图片</th>
+                                                        <td>
+                                                            <viewimg-comp :options="{image: scope.row.goodsImgStr, smallImgShow: true, imgHeight: '60px'}" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">产品资料</th>
+                                                        <td>
+                                                            <viewimg-comp :options="{image: scope.row.productImgStr, smallImgShow: true, imgHeight: '60px'}" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">投标参数</th>
+                                                        <td>
+                                                            <el-input type='textarea' size="mini" v-model="scope.row.tenderParams" readonly placeholder="-" autocomplete="off"></el-input>
+                                                            <!-- {{scope.row.tenderParams || '-'}} -->
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th width="20%">招标参数</th>
+                                                        <td>
+                                                            <!-- {{scope.row.bidsParams || '-'}} -->
+                                                            <el-input type='textarea' size="mini" v-model="scope.row.bidsParams" readonly placeholder="-" autocomplete="off"></el-input>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </el-popover>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="type"
+                                show-overflow-tooltip
+                                label="型号">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="design"
+                                show-overflow-tooltip
+                                label="款式">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="unit"
+                                show-overflow-tooltip
+                                label="单位">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="enterTime"
+                                show-overflow-tooltip
+                                label="录入时间">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="salesPrice"
+                                show-overflow-tooltip
+                                width="140"
+                                label="销售单价(元)">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="goodsImgStr"
+                                width="120"
+                                label="图片">
+                                <template slot-scope="scope">
+                                    <viewimg-comp :options="{image: scope.row.goodsImgStr, smallImgShow: true, imgHeight: '20px'}" />
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="productImgStr"
+                                width="120"
+                                label="产品资料">
+                                <template slot-scope="scope">
+                                    <viewimg-comp :options="{image: scope.row.productImgStr, smallImgShow: true, imgHeight: '20px'}" />
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="tenderParams"
+                                show-overflow-tooltip
+                                label="投标参数">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="bidsParams"
+                                show-overflow-tooltip
+                                label="招标参数">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="orderNum"
+                                show-overflow-tooltip
+                                label="优先等级">
+                            </el-table-column>
+                            <el-table-column
+                                align="center"
+                                prop="dangerNum"
+                                show-overflow-tooltip
+                                label="风险等级">
+                            </el-table-column>
+                        </el-table>
+                        <more-serach :outerVisible="outerVisible" @success="getName"></more-serach>
+                    </div>
+                </div>
+            </el-scrollbar>
+        </div>
+    </div>
+</template>
+<script>
+import goodsApi from "@/api/goods-api";
+import goodscacheApi from "@/api/goodscache-api";
+import quotationApi from "@/api/quotation-api";
+import dictdataApi from "@/api/dictdata-api";
+import lodashUtil from '@/utils/lodash-util'
+import MoreSerach from '@/components/upload/more-search'
+import { validateIsHighSearch } from '@/utils/validate'
+export default {
+    name: 'quotation-info-page',
+    data(){
+        return{
+            isAdd: false, 
+            isHighSearch: false, // 是否存在高搜索
+            goodsList: [],
+            allGoodsmultipleSelection:[],
+            outerVisible:false,//外层弹框
+            name: '', // 报价单名称
+            /* 所有货物清单搜所 */
+            allgoodsSearch: {
+                goodsName: '',  //货物名称
+                bigType: '', //大类类型
+                firm:'', //厂商
+                brand:'', //品牌
+                type:'', //型号
+                design:'', //款式
+                time:[],
+                startSalesPrice:'',  //销售价start
+                endSalesPrice:'',  //销售价end
+                tenderParams:'', //投标参数
+                bidsParams:'' ,  //招标参数
+                // names:''
+            },
+            allgoodsSearchRules: {},
+            discount: '', // 打折
+            allowance: '', // 优惠价格
+            totalsalesPrice: 0, // 销售总价
+            showTotalsalesPrice: 0, // 显示的报价
+            totalcostPrice: 0, // 成本总价
+            qgoodsList: [], // 报价单货物列表
+            cacheId: null,
+            profitGrade: [], // 利润率等级列表
+            profitGradeNumber: null, // 利润率等级数
+            showTotalsalesPriceColor: '', // 报价颜色
+        }
+    },
+    components: { MoreSerach},
+    created(){
+        const { cacheId, type } = this.$route.query
+        this.cacheId = cacheId
+        /* 提示操作手册 是否提示 */
+        this.operationmanual()
+        this.queryByTypes()
+
+        this.getCacheGoodsList() // 获取缓存的货物
+    },
+    beforeRouteLeave(to,from, next) {
+        if(this.qgoodsList.length) {
+            this.$confirm('有信息未保存确定要离开吗, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then( async () => {
+                next()
+            }).catch(err => console.warn(err));
+        } else {
+            next()
+        }
+    },
+    beforeDestroy() {
+        this.clearCacheGoods()
+    },
+    watch: {
+        'allgoodsSearch': {
+            handler(item) {
+                this.isHighSearch = validateIsHighSearch(item, 'goodsName')
+            },
+            deep: true
+        }
+    },
+    methods:{
+        /* 生成报价单 */
+        async createQuotation() {
+            if(!this.qgoodsList.length) {
+                this.$notify({
+                    title: "错误",
+                    message: '请先添加需要报价的货物',
+                    type: "error",
+                    duration: 2000,
+                });
+                return
+            }
+            const numberError = this.qgoodsList.filter(item => {
+                return !/^\d+$/.test(item.number) || item === 0
+            })
+            if(numberError.length) {
+                this.$notify({
+                    title: "货物数量错误",
+                    message: '货物数量输入有误',
+                    type: "error",
+                    duration: 2000,
+                });
+                return
+            }
+            if(!this.name) {
+                this.$notify({
+                    title: "报检单名称错误",
+                    message: '报检单名称不能为空',
+                    type: "error",
+                    duration: 2000,
+                });
+                return
+            }
+            const pass = this.computeDiscount()
+            if(!pass) {
+                this.$confirm('报价利润过低，确定要生成报价单吗, 是否继续?', '风险预警', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.save()
+                }).catch(() => {});
+            } else {
+                this.$confirm('确定生成报价单, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.save()
+                }).catch(() => {});
+            }
+        },
+        /* 保存报价单信息 */
+        save(){
+            const _this = this;
+            const quotatGoodslist = this.qgoodsList.map(item => ({goodsId: item.goodsId, number: item.number}))
+            const params = {
+                name: this.name, 
+                totalPrice: this.showTotalsalesPrice, 
+                profitMargin: this.profitGradeNumber, 
+                discount:this.discount, 
+                allowance:this.allowance, 
+                goodsString: JSON.stringify(quotatGoodslist)
+            }
+            quotationApi.save(params).then(res => {
+                this.$notify({
+                    title: "成功",
+                    message: "报检单生成成功",
+                    type: "success",
+                    duration: 1000,
+                    onClose() {
+                        _this.qgoodsList = []
+                        _this.$router.push({name: 'quotation-page'})
+                    }
+                });
+            }).catch(err => console.warn(err))
+        },
+        getName(data){
+            if(data === false){
+                this.outerVisible = data
+            }else{
+                // this.allgoodsSearch.names = data
+                console.log(data);
+                this.outerVisible = false
+            }
+            // console.log(data);
+        },
+        // 获取所有货物列表
+        allgetGoodsList(){
+            goodsApi.noPageList({...this.allgoodsSearch, cacheId: this.cacheId}).then(res => {
+                const data = res.data.data
+                if(data) this.goodsList = data
+            }).catch( err => console.warn(err))
+        },
+        /* 所有货物列表选择 */
+        allGoodsSelectionChange(row) {
+            this.allGoodsmultipleSelection = row
+        },
+        /* 报检单造作手册 */
+        operationmanual() {
+            const isshow = localStorage.getItem('quotation-operation')
+            if(isshow) return
+            const h = this.$createElement;
+            this.$msgbox({
+                title: '操作指引',
+                message: h('div', {style: 'font-size: 12px'}, [
+                    h('p', null, [
+                        h('span', null, '第一步：'),
+                        h('i', { style: 'color: red' }, '点击添加货物')
+                    ]),
+                    h('p', null, [
+                        h('span', null, '第二步：'),
+                        h('i', { style: 'color: red' }, '选中需要的货物，添加到报价单')
+                    ]),
+                    h('p', null, [
+                        h('span', null, '第三步：'),
+                        h('i', { style: 'color: red' }, '调整总价')
+                    ]),
+                    h('p', null, [
+                        h('span', null, '第四步：'),
+                        h('i', { style: 'color: red' }, '生成报价单或插入合同')
+                    ])
+                ]),
+                showCancelButton: true,
+                confirmButtonText: '确定',
+                cancelButtonText: '不再提示',
+            }).then(action => {}).catch(err => {
+                localStorage.setItem('quotation-operation', true)
+            });
+        },
+        /* 选中货的货物添加到报价单 */
+        async saveToQuotation() {
+            const list = [...this.allGoodsmultipleSelection]
+            if(!list.length) {
+                this.$notify({
+                    title: "错误",
+                    message: "请先选中添加的货物",
+                    type: "error",
+                    duration: 2000
+                });
+                return
+            }
+            this.isAdd = false
+            /* 过滤出选中货物的id */
+            const {data: {success}} = await this.saveCacheGoodsList(list)
+            if(success) {
+                this.getCacheGoodsList()
+            } else {
+                this.$notify({
+                    title: "错误",
+                    message: "货物添加到报价单失败",
+                    type: "error",
+                    duration: 2000
+                });
+            }
+        },
+        /* 报价单中取消货物 */
+        async del(row) {
+            const { id } = row;
+            await goodscacheApi.delByIds({ids: id})
+            this.getCacheGoodsList()
+        },
+        computeTotalPrice(goodsList) {
+            /* 计算总价 */
+            this.totalsalesPrice = 0; // 
+            this.totalcostPrice = 0; // 
+            goodsList.forEach(item => {
+                if(/^\d+$/.test(item.number)) {
+                    this.totalsalesPrice += (item.salesPrice*item.number) // 销售价
+                    this.totalcostPrice += (item.costPrice*item.number) // 成本价
+                }
+            })
+            this.showTotalsalesPrice = this.totalsalesPrice
+            this.computeDiscount()
+        },
+        /* 去货物列表添加货物 */
+        addGoodsBtnClick() {
+            this.allgetGoodsList()
+            this.isAdd = true
+        },
+        /* 根据cacheId查询是否有缓存的报价货物 */
+        getCacheGoodsList() {
+            goodscacheApi.getList({cacheId: this.cacheId}).then(res  => {
+                const data = res.data.data
+                if(data) this.qgoodsList = data.map(item => ({...item, number: 1}))
+                this.computeTotalPrice(this.qgoodsList)
+            }).catch(err => console.warn(err))
+        },
+        /* 缓存当前报价单中的货物 */
+        saveCacheGoodsList(goodslist) {
+            const ids = goodslist.map(item => item.id)
+            return goodscacheApi.save({cacheId: this.cacheId, goodsIds: ids.join(',')})
+        },
+        /* 清除cacheId下所有的缓存货物 */
+        clearCacheGoods(cb) {
+            if(cb) {
+                this.$confirm('确定清空报检单中所有货物, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then( async () => {
+                    await goodscacheApi.delByCacheId({cacheId: this.cacheId})
+                    this.getCacheGoodsList()
+                    this.showTotalsalesPriceColor = ''
+                    this.discount = ''
+                    this.allowance = ''
+                }).catch(err => console.warn(err));
+            } else {
+                goodscacheApi.delByCacheId({cacheId: this.cacheId})
+            }
+        },
+        /* 返回报价单 */
+        backQuotation() {
+            this.isAdd = false
+            this.getCacheGoodsList()
+        },
+        /* 计算折扣 利润率*/
+        computeDiscount() {
+            let flag = true
+            /* 
+                this.totalsalesPrice 销售价
+                this.totalcostPrice  成本价
+                this.discount // 打折
+                this.allowance, // 优惠价格
+                颜色： 1 绿色 ，2 黄色， 3 橙色， 4红色， 5黑红色
+                利润率 = (销售价 - 成本价) / 成本价 * 100%
+            */
+           if(!this.totalcostPrice) {
+               this.showTotalsalesPriceColor = ''
+               return
+           }
+           let profit, actualprice; // 利润率 
+            if(this.discount && this.allowance) {
+                /* 打折加有优惠 */
+                actualprice = this.totalsalesPrice * parseFloat(this.discount) / 10 - parseFloat(this.allowance)
+                profit = (actualprice - this.totalcostPrice) / this.totalcostPrice
+            } else if(this.discount) {
+                /* 只打折 */
+                actualprice = this.totalsalesPrice * parseFloat(this.discount) / 10
+                profit = (actualprice - this.totalcostPrice) / this.totalcostPrice
+            } else if(this.allowance) {
+                /* 只优惠 */
+                actualprice = this.totalsalesPrice - parseFloat(this.allowance)
+                profit = (actualprice - this.totalcostPrice) / this.totalcostPrice
+            } else {
+                actualprice = this.totalsalesPrice
+                profit = (actualprice - this.totalcostPrice) / this.totalcostPrice
+            }
+            this.showTotalsalesPrice = actualprice.toFixed(2)
+            if(profit && profit > 0) {
+                const profitGrade = this.profitGrade.filter(item => (profit > parseFloat(item.value))).map(item => item.orderNum)
+                this.profitGradeNumber = profitGrade[0]
+                switch(this.profitGradeNumber) {
+                    case 1:
+                        flag = true
+                        this.showTotalsalesPriceColor = '#05c70c'
+                        break;
+                    case 2:
+                        flag = true
+                        this.showTotalsalesPriceColor = '#ffa500'
+                        break;
+                    case 3:
+                        flag = true
+                        this.showTotalsalesPriceColor = '#ff8d00'
+                        break;
+                    case 4:
+                        flag = false
+                        this.showTotalsalesPriceColor = '#ff2f00'
+                        break;
+                    case 5:
+                        flag = false
+                        this.showTotalsalesPriceColor = '#8c1e05'
+                        break;
+                }
+            } else if(profit <= 0) {
+                flag = false
+                this.showTotalsalesPriceColor = '#8c1e05'
+                this.profitGradeNumber = 5
+            } else {
+                flag = false
+                this.profitGradeNumber = 5
+                this.showTotalsalesPriceColor = ''
+            }
+            return flag
+        },
+        /* 货物数量修改 */
+        goodsNumber(e) {
+            this.computeTotalPrice(this.qgoodsList)
+        },
+        /* 打折改变时 */
+        discountChange(e) {
+            const _this = this;
+            return new Promise(resolve => {
+                lodashUtil(() => {
+                    if(/^[0-9]+$/.test(e) || /^[0-9]+\.?[0-9]+?$/.test(e) && e) {
+                        if(parseFloat(e) >= 1 && parseFloat(e) <= 10) {
+                            _this.computeDiscount()
+                            resolve(true)
+                        } else {
+                            _this.$notify({
+                                title: "打折数错误",
+                                message: '请输入合理的打折数: 1~10',
+                                type: "error",
+                                duration: 2000,
+                            })
+                            resolve(false)
+                        }
+                    } else {
+                        _this.discount = ''
+                        _this.computeDiscount()
+                        resolve(true)
+                    }
+                }, 500)
+            })
+        },
+        /* 优惠价改变 */
+        allowanceChange(e) {
+            const _this = this;
+            return new Promise(resolve => {
+                lodashUtil(() => {
+                    if(/^[0-9]+$/.test(e) || /^[0-9]+\.?[0-9]+?$/.test(e) && e) {
+                        if(parseFloat(e) > this.totalsalesPrice) {
+                            this.$notify({
+                                title: "优惠价错误",
+                                message: '优惠价不能大于销售总价',
+                                type: "error",
+                                duration: 2000,
+                            })
+                            resolve(false)
+                        } else {
+                            this.computeDiscount()
+                            resolve(true)
+                        }
+                    } else {
+                        _this.allowance = ''
+                        _this.computeDiscount()
+                        resolve(true)
+                    }
+                }, 500)
+            })
+        },
+        /* 利润率数据字典 */
+        queryByTypes() {
+            dictdataApi.queryByModel({type: 'profit_margin'}).then(res => {
+                const data = res.data.data;
+                if(data) this.profitGrade = data
+            }).catch(err => console.log(err))
+        },
+        /* 返回至报价管理 */
+        back() {
+            this.$router.push({name: 'quotation-page'})
+        }
+    }
+}
+</script>
+<style lang="scss" scoped>
+    .p-i-section {
+        .info-input {
+            width: 180px;
+            margin-right: 5px;
+        }
+        .info-button {
+            margin: 0 5px;
+        }
+        .q-goods-container {
+            .q-header {
+                padding: 10px 0;
+                border-bottom: 1px solid #eeeeee;
+                .error-info {
+                    margin-left: 15px;
+                    color: $default-fail;
+                }
+            }
+            .info-warp {
+                margin-bottom: 15px;
+                padding: 15px 10px;
+                border-bottom: 1px solid #eeeeee;
+                .title {
+                    font-size: 22px;
+                    float: left;
+                    line-height: 28px;
+                }
+                .discount-wrap {
+                    float: left;
+                    margin-left: 50px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    .discount-input {
+                        margin-right: 5px;
+                    }
+                }
+            }
+            .q-goods-list {
+                /deep/.goods-number {
+                    .el-input__inner {
+                        text-align: center;
+                    }
+                    &.error {
+                        .el-input__inner {
+                            border-color: $default-fail;
+                        }
+                    }
+                }
+            }
+        }
+        .all-goods-container {
+            .all-goods-search {
+                padding-bottom: 15px;
+                .icon-svg {
+                    width: 1em;
+                    height: 1em;
+                }
+            }
+        }
+    }
+</style>

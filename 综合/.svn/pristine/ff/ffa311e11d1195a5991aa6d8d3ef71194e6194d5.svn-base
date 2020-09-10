@@ -1,0 +1,56 @@
+<template>
+    <div class="page-container page-info">
+        <div class="scroll-wrap">
+            <el-scrollbar class="scroll-wrap-bar">
+                <div class="p-i-section">
+                    <!-- 合同模板类型 -->
+                    <collapse-comp>
+                        <div class="type-tabs" v-show="typeActive">
+                            <el-input class="type-input" size="mini" v-model="infoForm.type" placeholder="请输入合同类型" clearable></el-input>
+                            <el-input class="type-input" size="mini" v-model="infoForm.name" placeholder="请输入合同名称" clearable></el-input>
+                            <el-button size="mini" type="primary">保存合同</el-button>
+                            <el-button size="mini" type="info">返回</el-button>
+                        </div>
+                    </collapse-comp>
+                    <div class="editor-container">
+                        <Kindeditor id="contract-template" />
+                    </div>
+                </div>
+            </el-scrollbar>
+        </div>
+    </div>
+</template>
+<script>
+import Kindeditor from '@/plugins/kindeditor'
+export default {
+    name: "contracttemplate-info",
+    data() {
+        return {
+            typeActive: true,
+            infoForm: {
+                type: '',
+                name: ''
+            },
+        }
+    },
+    components: { Kindeditor }
+};
+</script>
+<style lang="scss" scoped>
+    .p-i-section {
+        padding: 10px 10px;
+        position: relative;
+        box-sizing: border-box;
+        .type-tabs {
+            .type-input {
+                width: 160px;
+                margin-right: 5px;
+            }
+        }
+        .editor-container {
+            margin: 20px auto;
+            width: 21cm;
+            height: 29.7cm;
+        }
+    }
+</style>

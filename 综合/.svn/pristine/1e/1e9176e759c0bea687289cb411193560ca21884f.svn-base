@@ -1,0 +1,117 @@
+<template>
+    <div class="page-container page-info">
+        <div class="scroll-wrap">
+            <el-scrollbar class="scroll-wrap-bar">
+                <div class="p-i-section">
+                    <!-- 合同模板类型 -->
+                    <collapse-comp>
+                        <div class="type-tabs">
+                            <el-select v-model="type" placeholder="请选择模板类型" clearable size="mini" @change="getType">
+                                <el-option v-for="item in typeList" :key="item.id" :label="item.name" :value="item.id" >
+                                    {{item.name}}
+                                </el-option>
+                            </el-select>
+                            <el-button size="mini" type="primary" class="p-s-btn" @click="save">保存</el-button>
+                            <el-button size="mini" type="info" class="p-s-btn" @click="back">返回</el-button>
+                            <span class="error-info" v-show="!type">* 合同类型必填</span>
+                        </div>
+                    </collapse-comp>
+                    <div class="editor-container" v-show="typeActive">
+                        <Kindeditor :content="content.content" id="contract-template" height="100%" :minHeight="1000" :autoHeightMode="true" />
+                    </div>
+                </div>
+            </el-scrollbar>
+        </div>
+    </div>
+</template>
+<script>
+import contractApi from '@/api/contract-api'
+import Kindeditor from '@/plugins/kindeditor'
+export default {
+    name: "contracttemplate-info",
+    data() {
+        return {
+            typeActive: false,
+            typeList:[],
+            type:'',
+            content: ''
+        }
+    },
+    components: { Kindeditor },
+    created(){
+        this.getTemList()
+    },
+    methods: {
+        /* 保存合同 */
+        save() {
+            // contractApi.save({ type, name, content }).then(res => {
+            //     if (res.data.success) {
+            //         this.$notify({
+            //             title: "成功",
+            //             message: "保存成功",
+            //             type: "success",
+            //             duration: 1000,
+            //         });
+            //         this.$router.push({name:'contracttemplate-page'})
+            //     } else {
+            //         this.$notify({
+            //             title: "保存失败",
+            //             message: res.data.msg,
+            //             type: "warning",
+            //             duration: 1000
+            //         });
+            //     }
+            // })
+            console.log();
+        },
+        // 获取模板类型
+        getTemList(){
+            const that = this
+            contractApi.listNoPage().then(res =>{
+                  const data = res.data.data
+                  that.typeList = data
+            }).catch(err => console.warn(err));
+        },
+        // 返回
+        back(){
+            this.$router.push({name:'contractlist-page'})
+        },
+        // 获取合同模板
+        getType(id){
+            if(id){
+                this.typeActive = true;
+            }else{
+                this.typeActive = false;
+            }
+            // this.typeActive = true;
+            contractApi.findById({id}).then(res=>{
+                const data = res.data.data
+                this.content = data
+            }).catch(err=> console.log(err))
+        }
+    }
+};
+</script>
+<style lang="scss" scoped>
+    .p-i-section {
+        padding: 10px 10px;
+        position: relative;
+        box-sizing: border-box;
+        
+        .p-s-btn{
+            margin-left: 10px;
+        }
+        .error-info {
+            margin-left: 15px;
+            color: $default-fail;
+        }
+        .editor-container {
+            margin: 20px auto;
+            width: 20.9cm;
+            min-height: 29.7cm;
+            box-shadow: 0px 0px 5px #999999;
+            padding: 50px 60px;
+            background-color: #fefefefe;
+        }
+    }
+</style>

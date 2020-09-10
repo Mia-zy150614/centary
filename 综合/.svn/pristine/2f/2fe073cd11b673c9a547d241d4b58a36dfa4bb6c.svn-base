@@ -1,0 +1,93 @@
+<template>
+    <div class="page-container">
+        <div class="page-search clearfix">
+            <el-input v-model="searchOptions.name" size="mini" class="p-s-input" placeholder="请输入合同名称" clearable></el-input>
+            <el-button type="primary" size="mini" class="p-s-btn" @click="getList">搜索</el-button>
+            <div class="p-s-btn-right">
+                <el-button type="success" size="mini" title="新增合同" @click="add()">新增合同</el-button>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="page-content-scroll-warp">
+                <el-scrollbar class="scroll-wrap">
+                    <el-table :data="tableData" style="width: 100%" header-cell-class-name="custom-el-table-header-class" cell-class-name="custom-el-table-cell-class-name">
+                        <el-table-column align="center" type="selection"  v-model.trim="multipleSelection" width="55"></el-table-column>
+                        <el-table-column align="center" type="index" fixed :index="$indexMethod(0,searchOptions.currentPage,searchOptions.pageSize)" label="序号" width="80">
+                        </el-table-column>
+                        <el-table-column align="center" prop="name" label="合同名称" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                 <el-link type="primary" slot="reference" :underline="false">{{scope.row.name}}</el-link>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" prop="type" label="合同类型" show-overflow-tooltip></el-table-column>
+                        <!-- <el-table-column align="center" prop="createUserName" label="拟订人" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="cheackUser" label="复核人" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="createTime" label="拟订时间" show-overflow-tooltip></el-table-column> -->
+                        <!-- <el-table-column align="center" prop="status" label="状态">
+                            <template slot-scope="scope">
+                                <span class="table-column-success" v-if="scope.row.status === 1">停用中</span>
+                                <span class="table-column-fail" v-if="scope.row.status === 0">启用中</span>
+                            </template>
+                        </el-table-column> -->
+                        <el-table-column align="center" label="操作" fixed="right" width="210">
+                            <template slot-scope="scope">
+                                <el-link  @click.stop="view(scope.row)" :underline="false" type="info">详情</el-link>
+                                <!-- <el-divider direction="vertical"></el-divider>
+                                <el-link  @click="edit(scope.row)" :underline="false" type="warning">编辑</el-link> -->
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页器 -->
+                    <div class="page-pagination">
+                        <pagination-comp @currentChange="currentChange" :currentPage="searchOptions.currentPage" :total="searchOptions.total" />
+                    </div>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+import contractApi from '@/api/contract-api'
+export default {
+    /* 合同列表 */
+    name: 'contractlist-page',
+    data() {
+        return {
+            multipleSelection: [],
+            searchOptions: {
+                currentPage: 1, //当前页码
+                pageSize: 20, //每页显示条数
+                total: 0,
+                name:"",
+            },
+            tableData: [    
+                {
+                    id:1
+                }   
+            ]  
+        }
+    },
+    created() {
+        this.getList()
+    },
+    methods: {
+        /* 获取合同数据 */
+        getList() {
+            
+        },
+        add(){
+            this.$router.push({name:'contractlist-page-add'})
+        },
+        // edit(rows){
+        //     this.$router.push({name:'contractlist-page-edit',query:{type:'edit',id:rows.id}})
+        // },
+        view(rows){
+            this.$router.push({name:'contractlist-page-view',query:{type:'view',id:rows.id}})
+        },
+        currentChange(val) {
+            this.searchOptions.currentPage = val;
+            this.getList();
+        },
+    }
+}
+</script>

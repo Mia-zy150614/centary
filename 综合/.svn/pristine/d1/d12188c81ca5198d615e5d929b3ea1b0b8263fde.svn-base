@@ -1,0 +1,31 @@
+import { baseServer } from '../utils/post-request'
+
+class ContractApi {
+    // 保存合同
+    static save(data) {
+        return baseServer('/contract/save.shtml', data)
+    }
+    // 合同列表
+    static list(data) {
+        return baseServer('/contract/list.shtml', data)
+    }
+    //删除合同
+    static delete(data) {
+        return baseServer('/contract/delete.shtml',data)
+    }
+    //检查合同类型
+    static checkType(data) {
+        return baseServer('/contract/checkType.shtml',data)
+    }
+    //获取合同模板信息
+    static findById(data) {
+        return baseServer('/contract/findById.shtml',data)
+    }
+    //获取合同模板（无分页）
+    static listNoPage(data) {
+        return baseServer('/contract/listNoPage.shtml',data)
+    }
+
+}
+
+export default ContractApi

@@ -1,0 +1,107 @@
+const path = require('path')
+const fs = require('fs')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+
+const resolve = dir => path.resolve(__dirname, dir)
+
+const config = {
+    entry: 'main.js',
+    html: 'index.html',
+    pagesRoot: resolve('src/pages')
+}
+
+const getSubSystem = () => {
+    const allSubSystem = []
+    const findAllSubSystem = (source, allSubSystem) => {
+        const files = fs.readdirSync(source)
+        for (let i = 0; i < files.length; i++) {
+            const filename = files[i]
+            const fullname = path.join(source, filename)
+            const stats = fs.statSync(source, filename)
+            if (!stats.isDirectory()) break
+            if (fs.existsSync(`${fullname}/${config.entry}`)) {
+                allSubSystem.push(fullname)
+            }
+        }
+    }
+    findAllSubSystem(config.pagesRoot, allSubSystem)
+    return allSubSystem
+}
+
+const getPages = () => {
+    const pages = {}
+    getSubSystem().forEach(page => {
+        const filename = page.slice(config.pagesRoot.length + 1)
+        pages[filename] = {
+            entry: `${page}/${config.entry}`,
+            template: `${page}/${config.html}`,
+            filename: filename === 'index' ? config.html : `${filename}/${config.html}`
+        }
+    })
+    return pages
+}
+
+const pages = getPages()
+
+// vue 配置
+module.exports = {
+    productionSourceMap: false,
+    pages,
+    assetsDir: "static",
+    lintOnSave: false,
+    devServer: {
+        open: true
+    },
+    chainWebpack: config => {
+        Object.keys(pages).forEach(entryName => {
+            config.plugins.delete(`prefetch-${entryName}`);
+        });
+        if (process.env.NODE_ENV === 'production') {
+            config.plugin('extract-css').tap(() => [
+                {
+                    filename: 'static/css/[name].[contenthash:8].css',
+                    chunkFilename: 'static/css/[name].[contenthash:8].css'
+                }
+            ]);
+        }
+
+        // 全局使用scss变量
+        const oneOfsMap = config.module.rule('scss').oneOfs.store
+        oneOfsMap.forEach(item => {
+            item.use('sass-resources-loader').loader('sass-resources-loader').options({
+                resources: resolve('src/style/basictheme.scss'),
+            }).end()
+        })
+    },
+    configureWebpack: config => {
+        if (process.env.NODE_ENV === 'production') {
+            config.output = {
+                path: resolve('./dist'),
+                filename: '[name]/js/[name].[chunkhash:8].js',
+                publicPath: '/',
+                chunkFilename: 'static/js/[name].[chunkhash:8].js'
+            }
+        }
+
+        Object.assign(config.resolve.alias, { '@static': resolve('static') }, { '@basePath': resolve('/') });
+
+        const pluginsList = [
+            new CopyWebpackPlugin({
+                patterns: [
+                    {
+                        from: resolve('static'),
+                        to: 'static',
+                        globOptions: {
+                            ignore: ['.*']
+                        }
+                    }
+                ]
+            })
+        ]
+        pluginsList.forEach(item => {
+            config.plugins.push(item);
+        });
+    },
+    // node_modules依赖项es6语法未转换问题
+    transpileDependencies: ['vuex-persist', 'sass-resources-loader', 'element-ui'],
+}

@@ -1,0 +1,15 @@
+import { baseServer } from '../utils/post-request'
+
+class ContractApi {
+    // 保存合同
+    static save(data) {
+        return baseServer('/contract/save.shtml', data)
+    }
+    // 合同列表
+    static list(data) {
+        return baseServer('/contract/list.shtml', data)
+    }
+
+}
+
+export default ContractApi

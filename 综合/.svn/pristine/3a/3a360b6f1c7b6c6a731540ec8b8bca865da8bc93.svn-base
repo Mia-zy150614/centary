@@ -1,0 +1,156 @@
+<template>
+    <el-upload
+        class="upload-demo"
+        ref="upload"
+        :action="uploadUrl"
+        :file-list="fileList"
+        :on-change="fileChange"
+        :on-success="uploadSuccess"
+        :on-error="uploadFiled"
+        :on-exceed="overfileuploadNumber"
+        :on-remove="fileRemove"
+        :auto-upload="false"
+        :limit="1"
+    >
+        <el-button slot="trigger" size="mini" type="success">选取文件</el-button>
+        <el-button style="margin-left: 10px;" size="mini" type="danger" @click="submitUpload">上传导入</el-button>
+        <div slot="tip" class="el-upload__tip">只能上传excel文件</div>
+    </el-upload>
+</template>
+<script>
+    import goodsApi from "@/api/goods-api";
+export default {
+    /* excel 导入 */
+    name: "upload-pic-card",
+    props: {
+        uploadUrl: {
+            type: String,
+            required: true
+        }
+    },
+    data() {
+        return {
+            fileList: [],
+            loading: false,
+        };
+    },
+    created() {
+        console.log(this.uploadUrl);
+    },
+    methods: {
+        submitUpload() {
+            this.$refs.upload.submit();
+        },
+        // 上传文件 改变时
+        fileChange(file, fileList) {
+            if(file.status === "ready") {
+                // 文件准备就绪未上传
+
+                /* 
+                    ms-excel    测试.xls
+                    spreadsheetml.sheet     测试2.xlsx
+                    wordprocessingml.document   测试3.docx
+                    msword  测试4.doc
+                    image/jpeg  测试5.jpg
+                    image/png   测试6.png
+                    application/x-zip-compressed    测试7.zip
+                    application/pdf     测试8.pdf
+                    video/mp4     测试8.mp4
+                    audio/mpeg     测试8.mp3
+                
+                */
+                const { raw } = file
+                let reg = /(spreadsheetml|ms-excel)+/.test(raw.type);
+                if (!reg) {
+                    // 文件格式判断
+                    this.$notify.error({
+                        title: '异常',
+                        message: `文件格式不对，只能导入Excel`
+                    });
+                    fileList.pop() 
+                }
+            }
+        },
+        // 文件上传成功
+        uploadSuccess(response, file, fileList) {
+            var that = this;
+            var data = JSON.parse(response.data)
+            if(data) {
+                that.$notify({
+                    title: "提示",
+                    message:data.msg ,
+                    type: "success",
+                    duration: 6000,
+                });
+                if(data.data){
+                    const h = that.$createElement;
+                    const downloadFile = () =>{
+                        that.downloadFile(data.data)
+                    };
+                    that.$msgbox({
+                        title: '提示',
+                        message: h('p', null, [
+                            h('span',null, data.data),
+                            h('strong', {
+                                on: {
+                                    click: downloadFile
+                                },
+                                style: {
+                                    color: '#4dbd73',
+                                    cursor: 'pointer'
+                                }
+                            }, '点击下载错误提示文件')
+                        ]),
+                        type: "warning",
+                    }).then( () =>{
+                        that.$emit("uploadSuccess");
+                    });
+                }
+                that.$emit("uploadSuccess");
+                that.$refs.upload.clearFiles();
+            } else {
+                that.$notify({
+                    title: "提示",
+                    message: "导入失败, 错误信息已下载",
+                    type: "error",
+                    duration: 2000,
+                });
+                that.$refs.upload.clearFiles();
+            }
+
+        },
+        // 文件上传失败
+        uploadFiled(err, file, fileList) {
+            this.$message({message: '导入失败', type: 'warning'})
+            this.loading = false
+        },
+        // 文件超出上传个数
+        overfileuploadNumber(file, fileList) {
+            this.$notify.error({
+                title: '异常',
+                message: `文件最多导入${fileList.length}个`
+            });
+        },
+        // 文件在列表被移除后
+        fileRemove(file, fileList) {
+            const index = this.fileList.findIndex(item => item.uid === file.uid)
+            this.fileList.splice(index, 1)
+        },
+
+        //下载错误文件
+        downloadFile(fileName) {
+            goodsApi.downLoadTemplate({fileName:fileName}).then(function (res) {
+            }).catch(function (res) {
+                console.log(res);
+            });
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+    .el-upload__tip {
+        display: inline;
+        margin-left: 10px;
+        color: #999999;
+    }
+</style>

@@ -1,0 +1,263 @@
+<template>
+    <div class="pmunit-page page-container">
+        <div class="page-search clearfix">
+            <div class="p-s-btn-right">
+                <el-button type="success" size="mini" title="新建单位" @click="addUnit">新建单位</el-button>
+                <el-button type="success" size="mini" title="新建部门" @click="addDept">新建部门</el-button>
+            </div>
+        </div>
+        <div class="page-content" v-loading="loading">
+            <div class="page-content-scroll-warp">
+                <el-scrollbar class="scroll-wrap">
+                    <div class="pmunit-page-content clearfix">
+                        <div class="content-left">
+                            <p class="p-global-title">
+                                <span class="line"></span>
+                                <span class="text">组织架构树</span>
+                            </p>
+                            <el-tree 
+                                :data="treeData" 
+                                :props="defaultProps" 
+                                node-key="id"
+                                default-expand-all
+                                :expand-on-click-node="false"
+                                :check-strictly="true"
+                                class="organization-tree"
+                                ref="organizationTree"
+                            >
+                                <div class="organization-tree-node clearfix" slot-scope="{ node, data }">
+                                    <div class="node-left">
+                                        <span class="node-icon">
+                                            <svg class="icon-svg" aria-hidden="true" v-if="data.deptType === null">
+                                                <use xlink:href="#icon-pingtai"></use>
+                                            </svg>
+                                            <svg class="icon-svg" aria-hidden="true" v-if="data.deptType === 1">
+                                                <use xlink:href="#icon-gongsi"></use>
+                                            </svg>
+                                            <svg class="icon-svg" aria-hidden="true" v-if="data.deptType === 2">
+                                                <use xlink:href="#icon-bumen"></use>
+                                            </svg>
+                                        </span>
+                                        <span class="node-text">{{ node.label }}</span>
+                                    </div>
+                                    <div class="node-right" v-if="data.deptType !== null">
+                                        <el-link type="warning" :underline="false" @click="edit(data)" class="icon-wrap">编辑</el-link>
+                                        <el-divider direction="vertical"></el-divider>
+                                        <el-link type="info" :underline="false" @click="view(data)" class="icon-wrap">详情</el-link>
+                                        <el-divider direction="vertical"></el-divider>
+                                        <el-link type="danger" :underline="false" @click="doDel(data)" class="icon-wrap">删除</el-link>
+                                    </div>
+                                </div>
+                            </el-tree>
+                        </div>
+                        <!-- <div class="content-right">
+                            <p class="p-global-title">
+                                <span class="line"></span>
+                                <span class="text">信息展示</span>
+                            </p>
+                            <div class="organization-table-wrap">
+                                <table class="organization-table" width="100%" borderColor="#eeeeee" cellspacing='0' cellpadding="10" border="1">
+                                    <tbody>
+                                        <tr>
+                                            <th width="120">所属单位</th>
+                                            <td>{{tableData.pDeptName || '-'}}</td>
+                                            <th width="120">部门名称</th>
+                                            <td>{{tableData.name || '-'}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th width="120">部门简称</th>
+                                            <td>{{tableData.abbreviation || '-'}}</td>
+                                            <th width="120">部门负责人</th>
+                                            <td>{{tableData.contactName || '-'}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th width="120">联系方式</th>
+                                            <td colspan="3">{{tableData.contactMobile || '-'}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th width="120">备注</th>
+                                            <td colspan="3">{{tableData.remark || '-'}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div> -->
+                    </div>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+import deptApi from "@/api/dept-api";
+export default {
+    name: 'pmunit-page',
+    data() {
+        return {
+            treeData:[],
+            defaultProps: {
+                children: 'children',
+                label: 'label'
+            },
+            activeNodeObj: null, // 选中的 node 数据
+            tableData: {},
+            loading: false
+        }
+    },
+    created() {
+        const { id } = this.$route.query
+        this.getAllDeptTree()
+        // if(id)this.getById(id)
+    },
+    methods: {
+        //获取单位树
+        getAllDeptTree() {
+            deptApi.getAllDeptTree().then( res => {
+                const data = res.data.data
+                if(data) this.treeData = data;
+            }).catch(err => console.warn(err));
+        },
+        /* 新增单位 */
+        addUnit() {
+            this.$router.push({name: 'pmunit-add-unit-page'})
+        },
+        /* 新增单位 */
+        addDept() {
+            this.$router.push({name: 'pmunit-add-dept-page'})
+        },
+        /* 编辑 */
+        edit(node) {
+            const { deptType, id } = node
+            if(deptType === 1) {
+                this.$router.push({name: 'pmunit-add-unit-page', query: { type: 'edit', id }})
+            } else {
+                this.$router.push({name: 'pmunit-add-dept-page', query: { type: 'edit', id }})
+            }
+
+        },
+        /* 详情 */
+        view(node) {
+            const { deptType, id } = node
+            if(deptType === 1) {
+                this.$router.push({name: 'pmunit-add-unit-page', query: { type: 'view', id }})
+            } else {
+                this.$router.push({name: 'pmunit-add-dept-page', query: { type: 'view', id }})
+            }
+
+        },
+        /* 删除 */
+        doDel(node) {
+            const { id,deptType } = node
+            var that = this;
+            var mes = deptType === 1?"单位":"部门";
+            this.$confirm("确定要删除该"+mes+"？", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(() => {
+                deptApi.deleteDeptByIds({deptIds:id}).then(function (res) {
+                    if (res.data.success) {
+                        that.getAllDeptTree();
+                        that.$notify({
+                            title: "成功",
+                            message: "删除成功",
+                            type: "success",
+                            duration: 2000
+                        });
+                    } else {
+                        that.$notify({
+                            title: "删除失败",
+                            message: res.data.msg,
+                            type: "warning",
+                            duration: 2000
+                        });
+                    }
+                })
+                .catch(function (res) {
+                    console.log(res);
+                });
+            }).catch(function (res) {
+                console.log(res);
+            });
+        },
+
+    }
+}
+</script>
+<style lang="scss" scoped>
+    .pmunit-page {
+        .pmunit-page-content {
+            .content-left {
+                float: left;
+                width: 100%;
+                padding: 10px 20px;
+                box-sizing: border-box;
+            }
+            .content-right {
+                float: left;
+                padding: 10px 20px;
+                width: calc(100% - 340px);
+                min-width: 400px;
+                max-width: 900px;
+                .organization-table-wrap {
+                    padding-top: 15px;
+                    .organization-table {
+                        border-color: #eeeeee;
+                        text-align: center;
+                        tr, td, th {
+                            border-color: #eeeeee;
+                        }
+                        th {
+                            background-color: #f6f6f6;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /deep/.organization-tree {
+        // .is-checked > .el-tree-node__content {
+        //     background-color: $basictheme-color !important;
+        //     color: #ffffff;
+        //     .icon-svg {
+        //         color: #ffffff !important;
+        //         vertical-align: -3px;
+        //     }
+        // }
+        .organization-tree-node {
+            width: 100%;
+            .node-icon {
+                margin-right: 10px;
+                .icon-svg {
+                    color: $basictheme-color;
+                    vertical-align: -3px;
+                }
+            }
+            .node-left {
+                float: left;
+            }
+            .node-right {
+                float: right;
+                margin-right: 50px;
+                .icon-wrap {
+                    margin-right: 10px;
+                    font-size: 12px;
+                }
+            }
+        }
+        // .el-tree-node:focus > .el-tree-node__content {
+        //     background-color: $basictheme-color !important;
+        //     color: #ffffff;
+        //     .icon-svg {
+        //         color: #ffffff !important;
+        //     }
+        // }
+        // .el-tree-node .el-tree-node__content:hover {
+        //     background-color: $basictheme-hover-color !important;
+        //     color: #ffffff;
+        //     .icon-svg {
+        //         color: #ffffff !important;
+        //     }
+        // }
+    }
+</style>

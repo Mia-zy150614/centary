@@ -1,0 +1,78 @@
+/* 自定义全局方法，属性 */
+import { Notification } from 'element-ui'
+// 自定义Vue全局属性
+export function VuePrototype(Vue) {
+    /* table 序号 */
+    Vue.prototype.$indexMethod = (index, currentPage = 0, pageSize = 0) => {
+        return index + (currentPage - 1) * pageSize + 1
+    }
+    /* table 选中数据过滤 */
+    Vue.prototype.$multipleSelectionFilter = ({ multipleSelection, params }) => {
+        if (Array.isArray(multipleSelection)) {
+            return multipleSelection.map(item => {
+                if (Array.isArray(params)) {
+                    const obj = {}
+                    params.forEach(param => {
+                        obj[param] = item[param]
+                    })
+                    return obj
+                }
+
+                if (typeof params === 'string') {
+                    return item[params]
+                }
+                return null
+            })
+        } else {
+            return []
+        }
+    }
+    Vue.prototype.$filterNode = (value, data) => {
+        if (!value) return true;
+        return data.label.indexOf(value) !== -1;
+    }
+    /* 列表页操作数量验证 */
+    Vue.prototype.$validateRownumber = async multipleSelection => {
+        if (Array.isArray(multipleSelection)) {
+            const len = multipleSelection.length;
+            if (len > 1) {
+                Notification.error({
+                    title: '错误',
+                    message: '同时只能操作单条数据'
+                });
+                return false
+            }
+            if (len === 0) {
+                Notification.error({
+                    title: '错误',
+                    message: '请先选择需要操作数据'
+                });
+                return false
+            }
+            return true
+        } else {
+            console.warn('multipleSelection 必须是数组')
+            return false
+        }
+    }
+    /* 高级搜索确定 */
+    Vue.prototype.$hideSearch = callback => callback()
+    /* 高级搜索form重置 */
+    Vue.prototype.$hideReset = callback => callback()
+    /* 高级搜索确定 */
+    Vue.prototype.$hideSubmit = (callback, popover) => {
+        callback()
+        popover.doClose()
+    }
+    /* 过滤 select tree */
+    Vue.prototype.$filterNode = (value, data) => {
+        if (!value) return true;
+        return data.label.indexOf(value) !== -1;
+    }
+}
+
+// 自定Vue义全局组件
+export function customizeComponent(Vue) {
+    Vue.component('pagination-comp', () => import('../components/pagination.vue')) // 分页器
+    Vue.component('viewimg-comp', () => import('../components/viewimg.vue')) // 图片查看
+}

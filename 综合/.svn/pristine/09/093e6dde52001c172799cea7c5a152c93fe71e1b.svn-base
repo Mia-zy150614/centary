@@ -1,0 +1,70 @@
+import Vue from 'vue'
+import Session from './session-util'
+import store from '../store/index'
+import { validateRoute, filterSeverRouter } from './validate'
+export default router => {
+    router.beforeEach( async (to, from, next) => {
+        const tokenSession = Session.getLocalSession('token')
+        if(!tokenSession) {
+            /* 8小时 token 过期 */
+            const { pathname } = location;
+            if(pathname === '/') {
+                next()
+            } else {
+                Vue.prototype.$message({
+                    type: 'error',
+                    message: '用户登录过期',
+                    duration: 1000,
+                    onClose() {
+                        location.href = '/'
+                    }
+                })
+            }
+        }
+        const { userStore: { subSystems, token, user } } = store.state
+        const toPath = to.path
+        if ( token && user) {
+            const { options: { base, routes } } = router
+            // 设置子系统标识
+            store.commit('setBasepath', base)
+            if (!base) {
+                // 登录页面
+                next()
+                return
+            }
+            const menu = subSystems[base]['menus']
+            const menuPath = filterSeverRouter(menu)
+            const pass = validateRoute(to, menuPath)
+            if (to.path !== '/' && !pass) {
+                // 判断是否有子菜单
+                Vue.prototype.$notify({
+                    title: '无权限',
+                    dangerouslyUseHTMLString: true,
+                    message: '<strong class="my-notify">您无此页面的权限哟</strong>',
+                })
+                next({path: menuPath[0]})
+                return
+            } else {
+                if (toPath === '/') {
+                    next({path: menuPath[0]})
+                } else {
+                    next()
+                }
+            }
+        } else {
+            const { pathname } = location;
+            if(pathname === '/' && toPath === '/') {
+                next()
+            } else {
+                Vue.prototype.$message({
+                    type: 'error',
+                    message: '用户登录过期',
+                    duration: 1000,
+                    onClose() {
+                        location.href = '/'
+                    }
+                })
+            }
+        }
+    })
+}

@@ -1,0 +1,24 @@
+import { baseServer , filesLoader ,fileServer} from '../utils/post-request'
+
+class FileApi {
+    //上传 base64 数据流 图片
+    static uploadFile(data) {
+        return baseServer('/file_upload/upload_file_data.shtml', data)
+    }
+    // 上传文件
+    static uploadFiles(data) {
+        return filesLoader('upload_file', data)
+    }
+
+    //删除附件（系统）
+    static delete(data) {
+        return baseServer('/fileMajor/delete.shtml', data)
+    }
+    //删除文件服务器上的文件
+    static delServerFile(data) {
+        console.log(data);
+        return fileServer('/delete_file.shtml', data)
+    }
+}
+
+export default FileApi

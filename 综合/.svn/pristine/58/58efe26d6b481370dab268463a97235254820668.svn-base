@@ -1,0 +1,394 @@
+    <template>
+   <div class="page-container page-info">
+       <div class="scroll-wrap">
+           <el-scrollbar class="scroll-wrap-bar">
+                <div class="p-i-section">
+                    <div class="goods-table-wrap">
+                        <el-form :model="infoForm" :rules="formRules" ref="infoForm" class="p-i-form">
+                                <table class="goods-table" width="100%" borderColor="#eeeeee" cellspacing='0' cellpadding="8" border="1">
+                                    <thead>
+                                        <tr>
+                                            <th class="t-header-th" align="center" colspan="2">货物信息表</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th width="150">大类类型</th>
+                                            <td>
+                                                <el-form-item prop="bigType" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.bigType" placeholder="请输入大类类型" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">货物名称</th>
+                                            <td>
+                                                <el-form-item prop="name" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.name" placeholder="请输入货物名称" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">厂商</th>
+                                            <td>
+                                                <el-form-item prop="firm" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.firm" placeholder="请输入厂商" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">品牌</th>
+                                            <td>
+                                                <el-form-item prop="brand" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.brand" placeholder="请输入品牌" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">型号</th>
+                                            <td>
+                                                <el-form-item prop="type" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.type" placeholder="请输入型号" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">款式</th>
+                                            <td>
+                                                <el-form-item prop="design" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.design" placeholder="请输入款式" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">成本价</th>
+                                            <td>
+                                                <el-form-item prop="costPrice" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.costPrice" placeholder="请输入成本价" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">销售价</th>
+                                            <td>
+                                                <el-form-item prop="salesPrice" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.salesPrice" placeholder="请输入销售价" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">单位</th>
+                                            <td>
+                                                <el-form-item prop="unit" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.unit" placeholder="请输入单位" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">录入时间</th>
+                                            <td>
+                                                <el-form-item prop="enterTime" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.enterTime" placeholder="请输入录入时间(日期格式：YYYY-MM-DD)" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">联系人</th>
+                                            <td>
+                                                <el-form-item prop="contactPerson" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model="infoForm.contactPerson" placeholder="请输联系人" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">联系电话</th>
+                                            <td>
+                                                <el-form-item prop="phone" class="p-i-form-item-content">
+                                                    <el-input size="mini" v-model.number="infoForm.phone" placeholder="请输入联系电话" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">图片</th>
+                                            <td>
+                                                <edit-img v-show="infoForm.goodsImgStr" :options="{image: infoForm.goodsImgStr,  smallImgShow: true, imgHeight: '100px',buttonShow:true}" @delImg='delGoodsImg'/>
+                                                <Image2Base64 @success="getGoodsImgStr" v-show="!infoForm.goodsImgStr">
+                                                    <el-button slot="upload-btn" size="mini" type="success">长传货物图片</el-button>
+                                                </Image2Base64>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">产品资料</th>
+                                            <td>
+                                                <edit-img v-show="infoForm.productImgStr" :options="{image: infoForm.productImgStr,  smallImgShow: true, imgHeight: '100px',buttonShow:true}" @delImg='delProductImg'/>
+                                                <Image2Base64 @success="getProductImgStr" v-show="!infoForm.productImgStr">
+                                                    <el-button slot="upload-btn" size="mini" type="success">长传产品信息图片</el-button>
+                                                </Image2Base64>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">投标参数</th>
+                                            <td>
+                                                <el-form-item prop="tenderParams" class="p-i-form-item-content">
+                                                    <el-input type='textarea' size="mini" v-model="infoForm.tenderParams" placeholder="请输入参数" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">招标参数</th>
+                                            <td>
+                                                <el-form-item prop="bidsParams" class="p-i-form-item-content">
+                                                    <el-input type='textarea' size="mini" v-model="infoForm.bidsParams" placeholder="请输入参数" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th width="150">备注</th>
+                                            <td>
+                                                <el-form-item prop="remark" class="p-i-form-item-content">
+                                                    <el-input type='textarea' size="mini" v-model="infoForm.remark" placeholder="备注" autocomplete="off"></el-input>
+                                                </el-form-item>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                        </el-form>
+                    </div>
+                    <div class="submit-btn-warp">
+                        <el-button class="btn" type="primary" @click="submitSave('infoForm')" size="small">保存</el-button>
+                        <el-button class="btn" type="warning" size="small" @click="resset('infoForm')">重置</el-button>
+                        <el-button class="btn" type="info" size="small" @click="cancel">取消</el-button>
+                    </div>
+                </div>
+            </el-scrollbar>
+       </div>
+   </div>
+</template>
+<script>
+import goodsApi from "@/api/goods-api";
+import Image2Base64 from "@/components/upload/image2Base64";
+import EditImg from "@/components/edit-img";
+export default {
+    name: 'goods-info-page',
+    data() {
+        return {
+            infoForm: {
+                bigType: '', // 大类类型
+                name: '', // 货物名称
+                firm: '', // 厂商
+                brand: '', // 品牌
+                type: '', // 型号
+                design: '', // 款式
+                costPrice: '', // 成本价
+                salesPrice: '', // 销售价
+                contactPerson: '', // 联系人
+                unit: '', // 单位
+                enterTime: '', // 录入时间
+                phone: '', // 联系电话
+                goodsImgStr: '', // 货物图片
+                productImgStr: '', // 产品信息
+                tenderParams: '', // 投标参数
+                bidsParams: '', // 找标参数
+                remark: '', // 备注
+            },
+            formRules: {
+                bigType: { required: true, message: '必填', trigger: 'blur' }, // 大类类型
+                name: [
+                        { required: true, message: '必填', trigger: 'blur' },
+                        {max:100,message:'长度应在100字符以内',trigger:'blur'}
+                      ], // 货物名称
+                firm: {max:100,message:'长度应在100字符以内',trigger:'blur'}, // 厂商
+                brand: {max:40,message:'长度应在40字符以内',trigger:'blur'}, // 品牌
+                type:  {max:40,message:'长度应在40字符以内',trigger:'blur'}, // 型号
+                design:  {max:40,message:'长度应在40字符以内',trigger:'blur'}, // 款式
+                costPrice:  {validator: this.validatePrice, trigger: 'blur' }, // 成本价
+                salesPrice:   {validator: this.validatePrice, trigger: 'blur' }, // 销售价
+                contactPerson: {max:20,message:'长度应在20字符以内',trigger:'blur'}, // 联系人
+                phone: { validator: this.validatePhone, trigger: 'blur'  }, // 联系电话
+                unit: {max:5,message:'长度应在5字符以内',trigger:'blur'}, // 单位
+                enterTime:  { validator: this.validateTime, trigger: 'blur'  }, // 录入时间
+                goodsImgStr: { required: true, message: '必填', trigger: 'blur' }, // 图片
+                productImgStr: { required: true, message: '必填', trigger: 'blur' }, // 产品资料
+                tenderParams: {max:500,message:'长度应在500字符以内',trigger:'blur'}, // 投标参数
+                bidsParams: {max:500,message:'长度应在500字符以内',trigger:'blur'}, // 招标参数
+                remark: {max:200,message:'长度应在200字符以内',trigger:'blur'}, // 备注
+            }
+        }
+    },
+    components: { Image2Base64 ,EditImg },
+    created(){
+        const {id, type} = this.$route.query;
+        if( type && id) {
+            this.edit(id);
+        }
+    },
+    methods: {
+        edit(id){
+            goodsApi.getById({ id }).then( res => {
+                const data =  res.data.data
+                if(data) this.infoForm = res.data.data
+            }).catch(err => console.warn(err));
+        },
+        /* 货物信息保存 */
+        submitSave(form_name) {
+            const _this = this
+            this.$refs[form_name].validate(valid => {
+                if(valid) {
+                    goodsApi.save(this.infoForm).then(res =>{
+                        if (res.data.success) {
+                            this.$notify({
+                                title: "成功",
+                                message: "保存成功",
+                                type: "success",
+                                duration: 1500,
+                                onClose(){
+                                    _this.$router.push({ name: "goods-page" });
+                                }
+                            });
+                        } else {
+                            this.$notify({
+                                title: "保存失败",
+                                message: res.data.msg,
+                                type: "warning",
+                                duration: 1500
+                            });
+                        }
+                    })
+                } else {
+                    this.$notify({
+                        title: '错误',
+                        type: 'error',
+                        message: "请填写完整货物信息",
+                        duration: 1000
+                    })
+                }
+            })
+        },
+        /* 重置表单 */
+        resset(form_name) {
+            const values = Object.values(this.infoForm) // 判断 是否铁血了数据
+            const pass = values.find(item => item !== '')
+            if(pass) {
+                this.$confirm('重置表单会导致信息丢失, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$refs[form_name].resetFields();
+                    /* 手动重置 el-form 重置失效 */
+                    this.infoForm.goodsImgStr = ''
+                    this.infoForm.productImgStr = ''
+                }).catch(err => console.warn(err));
+            } else {
+                this.$refs[form_name].resetFields();
+            }
+        },
+        /* 取消返回 */
+        cancel() {
+            this.$router.push({name: 'goods-page'})
+        },
+        /* 获取货物图片 */
+        getGoodsImgStr(imgUrl) {
+            this.$set(this.infoForm, 'goodsImgStr', imgUrl)
+        },
+        /* 获取货物产品图片 */
+        getProductImgStr(imgUrl) {
+            this.$set(this.infoForm, 'productImgStr', imgUrl)
+        },
+        // 产品图片删除
+        delGoodsImg(val){
+            this.infoForm.goodsImgStr = val
+        },
+        // 产品资料图片删除
+        delProductImg(val){
+            this.infoForm.productImgStr = val
+        },
+        // 校验价格
+        validatePrice(rule,value,callback){
+            let reg = /^\d+(\.\d+)?$/
+            let reg1 = /^\d+(\.\d{1,2})?$/
+            let reg2 = /^\d{1,10}(\.\d{1,2})?$/
+            if(value){
+                if(!reg.test(value)){
+                    return callback(new Error('输入格式不正确'));
+                }
+                else{
+                    if(!reg1.test(value)){
+                        return callback(new Error('小数点后最多只能输入两位'))
+                    }
+                    else{
+                        if(!reg2.test(value)){
+                            return callback(new Error('金额过大'))
+                        }
+                        else{
+                            callback()
+                        }
+                    }
+                }
+            }else{
+                callback()
+            }
+        },
+        // 校验电话
+        validatePhone(rule,value,callback){
+            let reg = /^1[3456789]\d{9}$/
+            if(value && !reg.test(value)){
+                return callback(new Error('输入格式不正确'))
+            }else{
+                callback()
+            }
+        },
+        // 校验日期
+        validateTime(rule,value,callback){
+            let reg =/^(?:(?!0000)[0-9]{4}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)$/
+            if(value && !reg.test(value)){
+                return callback(new Error('输入格式不正确'))
+            }else{
+                callback()
+            }
+        },
+    }
+}
+</script>
+<style lang="scss" scoped>
+    .goods-table-wrap {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 25px;
+        .t-header-th {
+            font-size: 16px;
+            background-color: #eeeeee;
+            border: 1px solid #eeeeee;
+        }
+        /deep/.p-i-form-item-content {
+            margin-bottom: 0px;
+            max-width: 500px;
+            .el-input__inner {
+                border: none;
+                border-bottom: 1px solid #999999;
+            }
+            .el-form-item__error {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                left: 110%;
+                white-space: nowrap;
+                font-weight: bold;
+            }
+            &.is-error {
+               .el-input__inner {
+                    border-bottom: 1px solid $default-fail;
+                } 
+            }
+        }
+    }
+    .submit-btn-warp {
+        max-width: 1000px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 25px 0 30px;
+        .btn {
+            width: 100px;
+        }
+    }
+</style>

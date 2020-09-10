@@ -1,0 +1,164 @@
+<template>
+    <div class="page-container page-info">
+        <div class="scroll-wrap">
+            <el-scrollbar class="scroll-wrap-bar">
+                <div class="p-i-section">
+                    <!-- 合同模板类型 -->
+                    <collapse-comp>
+                        <div class="type-tabs" v-show="typeActive">
+                            <el-input class="type-input" size="mini" v-model="infoForm.type" placeholder="请输入合同类型" @change="getType()" clearable></el-input>
+                            <el-input class="type-input" size="mini" v-model="infoForm.name" placeholder="请输入合同名称" clearable></el-input>
+                            <el-button size="mini" type="primary" @click="save">保存合同</el-button>
+                            <el-button size="mini" type="warning" @click="importFile">导入模板</el-button>
+                            <el-button size="mini" type="info" @click="back">返回</el-button>
+                        </div>
+                    </collapse-comp>
+                    <div class="editor-container">
+                        <Kindeditor v-model="infoForm.content" :content="infoForm.content" id="contract-template" height="100%" :minHeight="1000" :autoHeightMode="true" />
+                    </div>
+                    <el-dialog
+                        :visible.sync="importDialog"
+                        custom-class="dialog-custom-class"
+                        width="1000"
+                        :close-on-click-modal="false"
+                        :close-on-press-escape="false"
+                        :show-close="false"
+                    >
+                        <p class="dialog-title" slot="title">导入</p>
+                        <div class="dialog-container">
+                            <UploadWord :uploadUrl="fileuploadUrl" @uploadSuccess="uploadSuccess" />
+                        </div>
+                        <div class="dialog-footer" slot="footer">
+                            <!-- <el-button class="dialog-footer-btn" type="primary" size="mini" >确定</el-button> -->
+                            <el-button class="dialog-footer-btn" type="info" size="mini" @click="importDialog = false">关闭</el-button>
+                        </div>
+                    </el-dialog>
+                </div>
+            </el-scrollbar>
+        </div>
+    </div>
+</template>
+<script>
+import contractApi from '@/api/contract-api'
+import Kindeditor from '@/plugins/kindeditor'
+import UploadWord from '@/components/upload/upload-word'
+export default {
+    name: "contracttemplate-info",
+    
+    data() {
+        return {
+            typeActive: true,
+            infoForm: {
+                type: '',
+                name: '',
+                content: ''
+            },
+            importDialog:false,
+            fileuploadUrl: contractApi.importWord( `uploadChildPath=uploadTemlate`), // 上传文件地址 采购目录
+        }
+    },
+    components: { Kindeditor , UploadWord },
+    created(){
+        const {id} = this.$route.query
+        if(id) this.getInfo(id)
+    },
+    methods: {
+        /* 保存合同 */
+        save() {
+            const {id} = this.$route.query
+            const { type, name, content } = this.infoForm
+            if(type && name && content) {
+                const params = id?{id,type, name, content}:{type, name, content}
+                contractApi.save(params).then(res => {
+                    if (res.data.success) {
+                        this.$notify({
+                            title: "成功",
+                            message: "保存成功",
+                            type: "success",
+                            duration: 1000,
+                        });
+                        this.$router.push({name:'contracttemplate-page'})
+                    } else {
+                        this.$notify({
+                            title: "保存失败",
+                            message: res.data.msg,
+                            type: "warning",
+                            duration: 1000
+                        });
+                    }
+                })
+            } else {
+                this.$notify({
+                    title: "错误",
+                    message: "模板信息不完整",
+                    type: "error",
+                    duration: 2000,
+                });
+            }
+        },
+        // 返回
+        back(){
+            this.$router.push({name:'contracttemplate-page'})
+        },
+        // 合同类型
+        getType(){
+            if(this.infoForm.type){
+                contractApi.checkType({type:this.infoForm.type}).then(res => {
+                    if(!res.data.data){
+                        this.$notify({
+                            title: "错误",
+                            message: "该类型已存在,请重新输入",
+                            type: "error",
+                            duration: 2000,
+                        });
+                        this.infoForm.type = ''
+                    }
+                }).catch( err => {
+                    console.log(err)
+                })
+            }
+        },
+        // 获取合同信息
+        getInfo(id){
+            contractApi.findById({id}).then(res => {
+                this.infoForm.type = res.data.data.type
+                this.infoForm.name = res.data.data.name
+                this.infoForm.content = res.data.data.content
+            }).catch(err => {
+                console.log(err)
+            })
+        },
+        // 导入模板
+        importFile(){
+            this.importDialog = true
+            console.log(this.fileuploadUrl)
+        },
+        uploadSuccess(value){
+            // this.getList();
+            console.log(value)
+            this.importDialog = false;
+        },
+    }
+};
+</script>
+<style lang="scss" scoped>
+    .p-i-section {
+        padding: 10px 10px;
+        position: relative;
+        box-sizing: border-box;
+        .type-tabs {
+            .type-input {
+                width: 160px;
+                margin-right: 5px;
+            }
+        }
+        .editor-container {
+            margin: 20px auto;
+            width: 20.9cm;
+            min-height: 29.7cm;
+            box-shadow: 0px 0px 5px #999999;
+            padding: 50px 60px;
+            background-color: #fefefefe;
+        }
+    }
+</style>

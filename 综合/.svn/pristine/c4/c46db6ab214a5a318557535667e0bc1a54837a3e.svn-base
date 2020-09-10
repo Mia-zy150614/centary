@@ -1,0 +1,446 @@
+<template>
+	<div class="page-container page-info">
+		<div class="scroll-wrap">
+			<el-scrollbar class="scroll-wrap-bar">
+				<div class="p-i-section">
+					<el-tabs v-model="activeName" type="border-card">
+						<el-tab-pane label="基本信息" name="first">
+							<el-form :model="personnelinfoForm" label-width="150px" :label-position="labelPosition" style="margin-left:15px">
+								<el-form-item  label="用户名" >
+									<el-link type="primary"  :underline="false">{{personnelinfoForm.userName}}</el-link>
+								</el-form-item>
+								<el-form-item  label="姓名" >
+									<el-link type="primary"  :underline="false">{{personnelinfoForm.name}}</el-link>
+								</el-form-item>
+								<el-form-item  label="所属部门" >
+									<el-link type="primary"  :underline="false">{{personnelinfoForm.deptName}}</el-link>
+								</el-form-item>
+								<el-form-item  label="所属角色" >
+									<el-link type="primary"  :underline="false">{{personnelinfoForm.roleName}}</el-link>
+								</el-form-item> 
+								<el-form-item  label="职位" >
+									<el-link type="primary"  :underline="false">{{personnelinfoForm.location}}</el-link>
+								</el-form-item>
+								<el-form-item  label="数据范围" >
+									<el-link type="primary"  :underline="false">{{personnelinfoForm.dataRange == 1 ? '本单位以下所有数据' : personnelinfoForm.dataRange == 2 ? '本部门数据':''}}</el-link>
+								</el-form-item>
+								<el-form-item  label="用户状态" >
+									<el-link type="primary"  :underline="false">{{personnelinfoForm.status == 1 ? '启用' : personnelinfoForm.status == 2 ? '禁用' :''}}</el-link>
+								</el-form-item>
+							</el-form>
+						</el-tab-pane>
+						<el-tab-pane label="详细信息" name="second"  class="p-i-content" :class="isDisable ? 'userinfo-wrap':''" >
+							<el-form ref="personinfo_form" :model="personnelinfoForm" :rules="personnelRules" label-width="120px" :label-position="labelPosition"  style="margin-left:15px">
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="民族"  class="p-i-form-item-content" prop="nation">
+										<el-select v-model="personnelinfoForm.nation" placeholder="请选择民族" clearable size="small" v-show="!isDisable">
+											<el-option v-for="item in nationOptions" :key="item.id" :label="item.name" :value="item.value">
+													{{item.name}}
+											</el-option>
+										</el-select>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.nationLabel}}</el-link>
+									</el-form-item>
+									<el-form-item label="性别"  class="p-i-form-item-content" prop="sex">
+										<el-select v-model="personnelinfoForm.sex" placeholder="请选择性别" clearable size="small" v-show="!isDisable">
+											<el-option v-for="item in sexOptions" :key="item.id" :label="item.name" :value="item.value">
+													{{item.name}}
+											</el-option>
+										</el-select>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.sexLabel}}</el-link>
+									</el-form-item>	
+								</div>
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="身份证号" class="p-i-form-item-content" prop="idCard"  placeholder="身份证号">
+										<el-input v-model="personnelinfoForm.idCard" size="small" clearable v-show="!isDisable"></el-input>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.idCard}}</el-link>
+									</el-form-item>
+									<el-form-item label="生日" class="p-i-form-item-content" prop="birthday" >
+										<el-date-picker size="small"  v-model="personnelinfoForm.birthday" type="date" placeholder="生日" format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-show="!isDisable"  style="width:100%"></el-date-picker>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.birthday}}</el-link>
+									</el-form-item>
+								</div>
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="籍贯" class="p-i-form-item-content" prop="nativePlace" >
+										<el-input v-model="personnelinfoForm.nativePlace" size="small" clearable v-show="!isDisable"></el-input>
+										<el-link type="primary" :underline="false" v-show="isDisable">{{personnelinfoForm.nativePlace}}</el-link>
+									</el-form-item>
+									<el-form-item label="婚姻状态"  class="p-i-form-item-content" prop="marriage">
+										<el-select v-model="personnelinfoForm.marriage" placeholder="请选择婚姻状态" clearable size="small" v-show="!isDisable">
+											<el-option v-for="item in marriageOptions" :key="item.id" :label="item.name" :value="item.value">
+													{{item.name}}
+											</el-option>
+										</el-select>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.marriageLabel}}</el-link>
+									</el-form-item>
+								</div>
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="学历"  class="p-i-form-item-content" prop="education">
+										<el-select v-model="personnelinfoForm.education" placeholder="请选择学历" clearable size="small" v-show="!isDisable">
+											<el-option v-for="item in educationOptions" :key="item.id" :label="item.name" :value="item.value">
+													{{item.name}}
+											</el-option>
+										</el-select>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.educationLabel}}</el-link>
+									</el-form-item>
+									<el-form-item label="学位"  class="p-i-form-item-content" prop="academicDegree">
+										<el-select v-model="personnelinfoForm.academicDegree" placeholder="请选择学位" clearable size="small" v-show="!isDisable">
+											<el-option v-for="item in academicDegreeOptions" :key="item.id" :label="item.name" :value="item.value">
+													{{item.name}}
+											</el-option>
+										</el-select>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.educationLabel}}</el-link>
+									</el-form-item>
+								</div>
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="政治面貌"  class="p-i-form-item-content" prop="politics">
+										<el-select v-model="personnelinfoForm.politics" placeholder="请选择政治面貌" clearable size="small" v-show="!isDisable">
+											<el-option v-for="item in politicsOptions" :key="item.id" :label="item.name" :value="item.value">
+													{{item.name}}
+											</el-option>
+										</el-select>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.politicsLabel}}</el-link>
+									</el-form-item>
+								</div>
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="身高(cm)"  class="p-i-form-item-content" prop="height">
+										<el-input v-model.number="personnelinfoForm.height" size="small" clearable v-show="!isDisable"></el-input>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.height}}</el-link>
+									</el-form-item>
+									<el-form-item label="体重(kg)"  class="p-i-form-item-content" prop="weight">
+										<el-input v-model.number="personnelinfoForm.weight" size="small" clearable v-show="!isDisable"></el-input>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.weight}}</el-link>
+									</el-form-item>
+								</div>
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="健康状态"  class="p-i-form-item-content" prop="health">
+										<el-select v-model="personnelinfoForm.health" placeholder="请选择健康状态" clearable size="small" v-show="!isDisable">
+											<el-option v-for="item in healthOptions" :key="item.id" :label="item.name" :value="item.value">
+													{{item.name}}
+											</el-option>
+										</el-select>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.healthLabel}}</el-link>
+									</el-form-item>
+									<el-form-item label="现居住地"  class="p-i-form-item-content" prop="adress">
+										<el-input v-model="personnelinfoForm.adress" size="small" clearable v-show="!isDisable"></el-input>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.adress}}</el-link>
+									</el-form-item>
+								</div>
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="联系方式"  class="p-i-form-item-content" prop="phone">
+										<el-input v-model="personnelinfoForm.phone" size="small" clearable v-show="!isDisable"></el-input>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.phone}}</el-link>
+									</el-form-item>
+									<el-form-item label="家庭联系方式"  class="p-i-form-item-content" prop="homePhone">
+										<el-input v-model="personnelinfoForm.homePhone" size="small" clearable v-show="!isDisable"></el-input>
+										<el-link type="primary"  :underline="false" v-show="isDisable">{{personnelinfoForm.homePhone}}</el-link>
+									</el-form-item>
+								</div>
+								<div class="p-i-form-item clearfix">
+									<el-form-item label="头像" class="el_form_item_rest large remark" prop="head">
+										<span class="personnel-head" v-show="isDisable">
+											<img src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="" v-if="personnelinfoForm.head == null">
+											<img :src="personnelinfoForm.head" v-else>
+										</span>
+										<div v-show="!isDisable">
+											<view-img v-show="personnelinfoForm.head" :options="{image: personnelinfoForm.head, smallImgShow: true, imgHeight: '100px',buttonShow:true}"  @delImg='delImg'/>
+											<Image2Base64 @success="getHeadImgStr" v-show="!personnelinfoForm.head">
+													<el-button slot="upload-btn" size="mini" type="success">上传头像图片</el-button>
+											</Image2Base64>
+										</div>
+									</el-form-item>
+								</div>
+							</el-form>
+							<div class="submit-btn-warp">
+								<el-button class="btn" size="small"   @click="cancel" v-if="!isDisable">取消</el-button>
+								<el-button class="btn" size="small" @click="cancel"  v-if="isDisable">返回</el-button>
+								<el-button class="btn" type="primary" size="small" v-if="!isDisable" :disabled="preventSecondarySubmit"  @click="saveSubmit('personinfo_form')">保存</el-button>
+							</div>	
+						</el-tab-pane>
+					</el-tabs>
+				</div>
+			</el-scrollbar>
+		</div>
+	</div>
+</template>
+
+<script>
+import dictDataApi from '@/api/dictdata-api'
+import Session from '@/utils/session-util'
+import personnelApi from '@/api/user-api'
+import Image2Base64 from "@/components/upload/image2Base64";
+import ViewImg from "@/components/view-pic";
+import { log } from 'util';
+export default {
+		name:'personnelinfo-page',
+		components: { Image2Base64 ,ViewImg},
+    data(){
+			var validateCheckMobile = (rule, value, callback) => {
+					var reg = /^[1][0-9]{10}$/;
+					if (value != null && value != "") {
+							if (value.length != 11 || !reg.test(value)) {
+									callback(new Error("电话格式不正确"));
+									return;
+							}
+					}
+					callback();
+			};
+			var validateCheckIdCard = (rule, value, callback) => {
+				var reg = /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+				if (value != null && value != "") {
+						if (value.length != 18 || !reg.test(value)) {
+								callback(new Error("身份证号不正确"));
+								return;
+						}
+				}
+				callback();
+			};
+			return {
+				labelPosition: 'left',
+				isDisable:false,
+				activeName:'first',
+				personnelinfoForm:{
+					status: "",
+					id:'',
+					userName: "",//用户名
+					name: "",//姓名
+					status: "",//状态
+					deptName:"",//部门
+					roleName:"",//角色
+					dataRange:"",//数据范围
+					location:"",//职位
+					userId:'',//用户ID
+					birthday:'',//生日
+					nation:'',//民族
+					nationLabel:'',
+					nativePlace:'',//籍贯
+					idCard:'',//身份证号
+					marriage:'',//婚姻状态
+					marriageLabel:'',
+					politics:'',//政治面貌
+					politicsLabel:'',
+					education:'',//学历
+					educationLabel:'',
+					academicDegree:'',//学位
+					health:'',//健康状况
+					healthLabel:'',
+					height:0,//身高
+					weight:0,//体重
+					adress:'',//地址
+					homePhone:'',//家庭联系方式
+					phone:'',//联系方式
+					head:'',//头像
+					sex:'',//性别
+					sexLabel:'',
+				},
+				personnelRules: {
+					idCard:[
+						{
+							validator: validateCheckIdCard,
+							trigger: "blur"
+						}
+					],
+					weight:[
+						{
+							type:'number',
+							message:'体重必须为数值',
+							// trigger: ["blur"]
+						}
+					],
+					height:[
+						{
+							type:'number',
+							message:'身高必须为数值',
+							// trigger: ["blur"]
+						}
+					],
+					phone: [
+						{
+							validator: validateCheckMobile,
+							trigger: "blur"
+						}
+					],
+					homePhone:[
+						{
+						
+							validator: validateCheckMobile,
+							trigger: "blur"
+						}
+					]
+				},
+				sexOptions:[],//性别列表
+				nationOptions:[],//民族列表
+				politicsOptions:[],//政治面貌
+				marriageOptions:[],//婚姻状态
+				educationOptions:[],//学历
+				academicDegreeOptions:[],//学位
+				healthOptions:[],//健康状态列表
+				preventSecondarySubmit: false, // 阻止二次提交
+      }
+    },
+    created(){
+			const{id,type} = this.$route.query
+			this.personnelinfoForm.userId = id
+			if(id){
+				this.getPersonnelInfo(id)	
+				if(type == 'view'){
+					this.isDisable = true
+				}
+				if(type == 'edit'){
+					Promise.all([this.getAllNation(),this.getAllSex(),this.getAllMarriage(),this.getAllEducation(),this.getAllAcademicDegree(),this.getAllHealth(),this.getAllPolitics()])
+				}
+					
+			}
+		},
+		methods:{
+			// 获取用户基本资料
+			getPersonnelInfo(userId){
+				personnelApi.getUserDetailInfo({userId}).then(res =>{
+					let data = res.data.data
+					this.personnelinfoForm = data
+				}).catch(res =>{
+					console.log(res);
+				})
+			},
+			delImg(val){
+				this.personnelinfoForm.head = val
+			},
+			//保存
+			saveSubmit(form_name){
+				const{type} = this.$route.query
+				var that = this;
+				if(this.preventSecondarySubmit) return
+				this.preventSecondarySubmit = true
+				this.$refs[form_name].validate(valid => {
+					if(valid){
+						const {id,userId,birthday,nation,nativePlace,idCard,marriage,politics,education,academicDegree,health,height,weight,adress,homePhone,phone,head,sex} = this.personnelinfoForm
+						personnelApi.saveUserDetailInfo({id,userId,birthday,nation,nativePlace,idCard,marriage,politics,education,academicDegree,health,height,weight,adress,homePhone,phone,head,sex}).then(res=>{
+								if (res.data.success) {
+												that.$notify({
+														title: "成功",
+														message: "保存成功",
+														type: "success",
+														duration: 500,
+														onClose(){
+																that.$router.go(-1)	
+																that.preventSecondarySubmit =  false
+														}
+												});
+									} else {
+											that.$notify({
+													title: "保存失败",
+													message: res.data.msg,
+													type: "warning",
+													duration: 2000
+											});
+											that.preventSecondarySubmit = false
+									}
+						}).catch(res=>{
+								console.log(res);
+						})
+					}else {
+						console.log("error submit!!");
+						this.preventSecondarySubmit = false
+						return false;
+					}
+				})
+			},
+			/* 获取头像图片 */
+			getHeadImgStr(imgUrl) {
+					this.$set(this.personnelinfoForm, 'head', imgUrl)
+					console.log(imgUrl);
+			},
+			//取消按钮 返回
+			cancel(){
+				this.$router.go(-1)	
+			},
+			//民族列表
+			getAllNation() {
+					dictDataApi.queryByModel({type: 'nation_type'}).then(res=>{
+							this.nationOptions = res.data.data;
+					}).catch(function (res) {
+							console.log(res);
+					});
+			},
+			//性别列表
+			getAllSex() {
+					dictDataApi.queryByModel({type: 'sex_type'}).then(res=>{
+							this.sexOptions = res.data.data;
+					}).catch(function (res) {
+							console.log(res);
+					});
+			},
+			// 婚姻状态
+			getAllMarriage(){
+					dictDataApi.queryByModel({type:'marriage_type'}).then(res=>{
+							this.marriageOptions = res.data.data;
+					}).catch(function (res) {
+							console.log(res);
+					});
+			},
+			//学历状态
+			getAllEducation(){
+					dictDataApi.queryByModel({type:'education_type'}).then(res=>{
+							this.educationOptions = res.data.data;
+					}).catch(function (res) {
+							console.log(res);
+					});
+			},
+			//学位状态
+			getAllAcademicDegree(){
+					dictDataApi.queryByModel({type:'academic_type'}).then(res=>{
+							this.academicDegreeOptions = res.data.data;
+					}).catch(function (res) {
+							console.log(res);
+					});
+			},
+			// 健康状态
+			getAllHealth(){
+					dictDataApi.queryByModel({type:'health_type'}).then(res=>{
+						this.healthOptions = res.data.data;
+					}).catch(function (res) {
+							console.log(res);
+					});
+			},
+			// 政治面貌
+			getAllPolitics(){
+					dictDataApi.queryByModel({type:'politics_type'}).then(res=>{
+							this.politicsOptions = res.data.data;
+					}).catch(function (res) {
+							console.log(res);
+					});
+			},
+		}
+}
+</script>
+
+<style lang='scss' scoped>
+.scroll-wrap{
+	.el-select {
+			width: 100%;
+	}
+	.personnel-head{
+		display: inline-block;
+		width: 80px;
+		height: 80px;
+			img{
+					height: 100%;
+			}
+}
+/deep/.p-i-form-item-content {
+    float: left;
+    width: 500px !important;
+}
+}
+/deep/.el-tabs--border-card {
+	box-shadow: 0 0 0 0;
+}
+ .submit-btn-warp {
+        max-width: 1000px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 25px 0 30px;
+        .btn {
+            width: 100px;
+        }
+    }
+</style>

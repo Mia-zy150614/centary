@@ -1,0 +1,234 @@
+<template>
+    <div class="page-container page-info">
+        <div class="p-i-section">
+            <div class="p-i-title clearfix">
+                <span class="line"></span>
+                <span class="text">申请基本信息</span>
+            </div>
+            <div class="p-i-content">
+                <el-form :model="infoForm" :rules="formRules" ref="infoForm" label-width="120px" class="p-i-form">
+                    <div class="p-i-form-item clearfix">
+                        <el-form-item label="请假类型：" class="p-i-form-item-content" prop="leaveType">
+                            <el-select v-model="infoForm.leaveType" :disabled="isDisable" placeholder="请选请假类型" style="width: 100%" size="small"
+                                       >
+                                <el-option v-for="item in leaveTypeList" :key="item.value" :label="item.name" :value="item.value"> {{item.name}} </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </div>
+                    <div class="p-i-form-item clearfix">
+                        <el-form-item label="时间：" class="p-i-form-item-content" prop="time">
+                            <el-date-picker
+                                    v-model="infoForm.time"
+                                    size="small"
+                                    type="datetimerange"
+                                    format="yyyy-MM-dd HH:mm"
+                                    value-format="yyyy-MM-dd HH:mm"
+                                    range-separator="至"
+                                    start-placeholder="开始日期"
+                                    end-placeholder="结束日期"
+                                    align="left"
+                                    @change="timeChange">
+                            </el-date-picker>
+                        </el-form-item>
+                    </div>
+                    <div class="p-i-form-item clearfix">
+                        <el-form-item label="时长：" class="p-i-form-item-content" prop="timelen">
+                            <el-input size="small" v-model.trim="infoForm.timelen" :disabled="true" clearable></el-input>
+                        </el-form-item>
+                    </div>
+                    <div class="p-i-form-item clearfix">
+                        <el-form-item label="内容：" prop="content" class="p-i-form-item-content large">
+                            <el-input type="textarea" v-model="infoForm.content" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </div>
+                    <div class="p-i-form-item clearfix">
+                        <el-form-item label="审批人：" class="p-i-form-item-content" prop="checkUserId">
+                            <el-select v-model="infoForm.checkUserId" placeholder="请选择审批人员" :disabled="isDisable" style="width: 100%" size="small" filterable clearable>
+                                <el-option v-for="item in allUserList" :key="item.id" :label="item.name" :value="item.id" :disabled="item.id=== $store.getters.userId">
+                                    <span style="float: left; font-size: 14px; margin-right: 15px">{{ item.name }}</span>
+                                    <span style="float: left; color: #8492a6; font-size: 12px">{{ item.locationName }}</span>
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="抄送人员：" class="p-i-form-item-content" prop="copyUserId">
+                            <el-select v-model="infoForm.copyUserId" placeholder="请选择抄送人员：" :disabled="!infoForm.checkUserId || isDisable " class="multiple_input" style="width: 100%" size="small" filterable multiple clearable>
+                                <el-option v-for="item in allUserList" :key="item.id" :label="item.name" :value="item.id" :disabled="item.id === infoForm.checkUserId">
+                                    <span style="float: left; font-size: 14px; margin-right: 15px">{{ item.name }}</span>
+                                    <span style="float: left; color: #8492a6; font-size: 12px">{{ item.locationName }}</span>
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </div>
+                    <div class="p-i-form-item clearfix">
+                        <el-form-item label="备注：" prop="remark" class="p-i-form-item-content large">
+                            <el-input type="textarea" v-model="infoForm.remark" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </div>
+                    <div class="p-i-form-item submit-wrap">
+                        <el-button class="btn" size="small" @click="$router.go(-1)">取消</el-button>
+                        <el-button class="btn" type="primary" size="small" @click="saveSubmit('infoForm',0,'保存成功')">保存</el-button>
+                        <el-button class="btn" type="primary" size="small" @click="saveSubmit('infoForm',1,'发送成功')">保存并发送</el-button>
+                    </div>
+                </el-form>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    import dictDataApi from "@/api/dictdata-api";
+    import userApi from '@/api/user-api';
+    import applyApi from '@/api/apply-api';
+    // import UploadComp from '@/components/upload/index'
+    import { mapState } from 'vuex'
+    export default {
+        name: 'apply-info',
+        data() {
+            return {
+                isDisable: false,
+                infoForm: {
+                    id:'',
+                    leaveType:"",
+                    time:"",
+                    timelen:"",
+                    checkUserId: "", // 审批人
+                    copyUserId: [], // 抄送人
+                },
+                formRules: {
+                    leaveType: [{ required: true, message: '请假类型不能为空'}],
+                    time: [{ required: true, message: '时间不能为空'}],
+                    content: [{required: true, message: '内容不能为空'},{ max: 100, message: '序号不能超过100个字符',trigger: 'blur'}],
+                },
+                leaveTypeList:[],// 请假类型
+                allUserList: [], // 所有人员
+                // 附件列表
+                attachmentList: []
+            }
+        },
+        created() {
+            this.getDictList("leave_type")
+            const {id, type,applyType} = this.$route.query;
+            if( type && id) {
+
+            }
+            this.getRulesUser(applyType);
+            this.getUserNameAndLocation();
+        },
+        computed: {
+            /*...mapState({
+                uploading: state => state.upload.uploading
+            })*/
+        },
+        // components: { UploadComp },
+        methods: {
+            // 保存报损申请
+            saveSubmit(form_name, save_type,msg) {
+                var that = this;
+                /*console.log(that.formData.time[0]);
+                return*/
+                this.$refs[form_name].validate(valid => {
+                    if(valid) {
+                        const params = {
+                            id:that.infoForm.id,
+                            leaveType:that.infoForm.leaveType,
+                            timelen:that.infoForm.timelen,
+                            content:that.infoForm.content,
+                            startTime:that.infoForm.time[0],
+                            endTime:that.infoForm.time[1],
+                            remark:that.infoForm.remark,
+                            checkUserId:that.infoForm.checkUserId,
+                            copyUserId:that.infoForm.copyUserId?that.infoForm.copyUserId.join(','):'',
+                            isSend:save_type,
+                            applyType:'1'
+                        }
+                        if(this.attachmentList.length > 0) {
+                            let fileDatas = this.attachmentList.map(item => {
+                                return { id: item.id, fileName: item.name, fileUrl: item.url, type: item.type }
+                            })
+                            console.log(fileDatas);
+                            params.fileDatas = JSON.stringify(fileDatas) // 判断有无附件
+                        }
+                        applyApi.save(params).then(res =>{
+                            if (res.data.success) {
+                                that.$notify({
+                                    title: "成功",
+                                    message: msg,
+                                    type: "success",
+                                    duration: 2000,
+                                    onClose(){
+                                        that.$router.push({ name: "apply-page" });
+                                    }
+                                });
+                            } else {
+                                that.$notify({
+                                    title: "保存失败",
+                                    message: res.data.msg,
+                                    type: "warning",
+                                    duration: 2000
+                                });
+                            }
+                        })
+                    }
+                })
+            },
+            //获取请假类型
+            getDictList(type) {
+                dictDataApi.queryByModel({type:type}).then( res => {
+                    if(res.data.success){
+                        this.leaveTypeList = res.data.data;
+                    }else{
+                        this.leaveTypeList = [];
+                    }
+                }).catch(function (res) {
+                    console.log(res);
+                });
+            },
+            // 获取人员
+            getRulesUser(applyType) {
+                applyApi.getRulesUser({applyType:applyType}).then(res => {
+                    console.log(res.data)
+                })
+            },
+            // 获取人员
+            getUserNameAndLocation() {
+                userApi.getUserNameAndLocation().then(res => {
+                    const data = res.data.data;
+                    if(data)this.allUserList =  data;
+                })
+            },
+            //时间变化时
+            timeChange(val){
+                console.log(val)
+                if(!val){
+                    this.infoForm.timelen = '';
+                    return;
+                }
+                var date3 = new Date(val[1]).getTime()-new Date(val[0]).getTime();   //时间差的毫秒数
+                //计算出相差天数
+                var days=Math.floor(date3/(24*3600*1000))
+                //计算出小时数
+                var leave1=date3%(24*3600*1000)    //计算天数后剩余的毫秒数
+                var hours=Math.floor(leave1/(3600*1000))
+                //计算相差分钟数
+                var leave2=leave1%(3600*1000)        //计算小时数后剩余的毫秒数
+                var minutes=Math.floor(leave2/(60*1000))
+                if(days>0){
+                    this.infoForm.timelen = days+"天 "+hours+"小时 "+minutes+" 分钟"
+                }else{
+                    if(hours>0){
+                        this.infoForm.timelen = hours+"小时 "+minutes+" 分钟"
+                    }else{
+                        if(minutes>0){
+                            this.infoForm.timelen = minutes+" 分钟"
+                        }else{
+                            this.$message({type: 'error', message: '开始时间不能等于结束时间'})
+                        }
+                    }
+                }
+            },
+            // 取消返回
+            cancel(){
+                this.$router.go(-1)
+            }
+        }
+    }
+</script>

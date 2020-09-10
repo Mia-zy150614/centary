@@ -1,0 +1,67 @@
+<template>
+    <el-dialog  width="500" :visible.sync="outerVisible" custom-class="dialog-custom-class" :close-on-click-modal="false" :close-on-press-escape="false"  :show-close="false">
+        <p class="dialog-title" slot="title">批量搜索</p>
+        <el-dialog
+        :visible.sync="innerVisible"
+        custom-class="dialog-custom-class"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        :show-close="false"
+        append-to-body>
+            <p class="dialog-title" slot="title">批量导入搜索</p>
+            <div class="dialog-container">
+                <UploadWord :uploadUrl="fileuploadUrl" @uploadSuccess="uploadWordSuccess" />
+            </div>
+            <div class="dialog-footer" slot="footer">
+                <el-button class="dialog-footer-btn" type="info" size="mini" @click="innerVisible = false">关闭</el-button>
+            </div>
+        </el-dialog>
+        <el-input type="textarea" :rows="5" placeholder="请输入内容" v-model="name" ></el-input>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="close">取 消</el-button>
+            <el-button @click="getMoreList">确定</el-button>
+            <el-button type="primary" @click="innerVisible = true">导入模板</el-button>
+        </div>
+    </el-dialog>
+</template>
+
+<script>
+import UploadWord from '@/components/upload/upload-word'
+import goodsApi from "@/api/goods-api";
+export default {
+    data(){
+        return {
+            innerVisible:false,
+            name:'',
+            fileuploadUrl: goodsApi.importExcel( `uploadChildPath=uploadTemlate`), // 上传文件地址 批量搜索
+        }
+    },
+    props:{
+        outerVisible:false
+    },
+    watch: {
+        value: function(n) {
+            this.name = n
+            // 修改 v-model 数据
+            this.$emit('success', n)
+        },
+    },
+    methods:{
+        uploadWordSuccess(value){
+            this.innerVisible = false
+            console.log(value);
+        },
+        close(){
+            this.$emit('success',false)
+        },
+        getMoreList(){
+            this.$emit('success',this.name)
+        }
+    },
+    components: { UploadWord },
+}
+</script>
+
+<style>
+
+</style>

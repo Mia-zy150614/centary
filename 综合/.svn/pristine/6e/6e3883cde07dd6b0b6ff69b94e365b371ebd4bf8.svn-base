@@ -1,0 +1,101 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+
+export default new VueRouter({
+    mode: 'history',
+    base: 'system',
+    routes: [
+        { 
+            path: '/', 
+            // redirect: '/user', 
+            component: () => import('../../components/layout/index.vue'),
+            children: [
+                {
+                    path: '/role', 
+                    name: 'role-page', 
+                    meta: { title: '角色管理', role: 'role', icon: 'menu_role_icon' }, 
+                    component: () => import('./views/role.vue')
+                },
+                {
+                    path: '/role/add', 
+                    name: 'role-add-page', 
+                    meta: { title: '角色添加', role: 'role', icon: 'menu_role_icon' }, 
+                    component: () => import('./views/role-info.vue')
+                },
+                {
+                    path: '/user', 
+                    name: 'user-page', 
+                    meta: { title: '用户管理', role: 'user', icon: 'menu_user_icon'  }, 
+                    component: () => import('./views/user.vue')
+                },
+                {
+                    path: '/management', 
+                    name: 'management-page', 
+                    meta: { title: '操作日志', role: 'management', icon: 'menu_management_icon' }, 
+                    component: () => import('./views/management.vue')
+                },
+                {
+                    path: '/dictionary', 
+                    name: 'dictionary-page', 
+                    meta: { title: '数据字典', role: 'dictionary', icon: 'menu_dictionary_icon' }, 
+                    component: () => import('./views/dictionary.vue')
+                },
+                {
+                    path: '/dictionary/add', 
+                    name: 'dictionary-add-page', 
+                    meta: { title: '数据字典新增', role: 'dictionary', icon: 'menu_dictionary_icon' }, 
+                    component: () => import('./views/dictionary-info.vue')
+                },
+                {
+                    path: '/dictionary/edit', 
+                    name: 'dictionary-edit-page', 
+                    meta: { title: '数据字典编辑', role: 'dictionary', icon: 'menu_dictionary_icon' }, 
+                    component: () => import('./views/dictionary-info.vue')
+                },
+                {
+                    path: '/params', 
+                    name: 'params-page', 
+                    meta: { title: '系统参数', role: 'params', icon: 'menu_params_icon' }, 
+                    component: () => import('./views/params.vue')
+                },
+                {
+                    path: '/params/edit', 
+                    name: 'params-edit-page', 
+                    meta: { title: '系统参数编辑', role: 'params', icon: 'menu_params_icon' }, 
+                    component: () => import('./views/params-info.vue')
+                },
+                {
+                    path: '/pmunit', 
+                    name: 'pmunit-page', 
+                    meta: { title: '组织架构', role: 'pmunit', icon: 'menu_unit_icon' }, 
+                    component: () => import('./views/pmunit.vue')
+                },
+                {
+                    path: '/pmunit/add/unit', 
+                    name: 'pmunit-add-unit-page', 
+                    meta: { title: '新增单位', role: 'pmunit', icon: 'menu_unit_icon' }, 
+                    component: () => import('./views/pmunit-unit-info.vue')
+                },
+                {
+                    path: '/pmunit/add/dept', 
+                    name: 'pmunit-add-dept-page', 
+                    meta: { title: '新增部门', role: 'pmunit', icon: 'menu_unit_icon' }, 
+                    component: () => import('./views/pmunit-dept-info.vue')
+                },
+                {
+                    path: '/rule', 
+                    name: 'rule-page', 
+                    meta: { title: '审批规则', role: 'rule', icon: 'menu_shenpi_icon' }, 
+                    component: () => import('./views/rule.vue')
+                },
+                {
+                    path: '/rule/add', 
+                    name: 'rule-page-add', 
+                    meta: { title: '审批规则新增', role: 'rule', icon: 'menu_shenpi_icon' }, 
+                    component: () => import('./views/rule-info.vue')
+                }
+            ]
+        },
+    ]
+})

@@ -1,0 +1,22 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+
+export default new VueRouter({
+    mode: 'history',
+    base: 'libray',
+    routes: [
+        { 
+            path: '/', 
+            component: () => import('../../components/layout/index.vue'),
+            children: [
+                {
+                    path: '/goods', 
+                    name: 'role-page', 
+                    meta: { title: '货物列表', role: 'goods', icon: 'menu_huowu_icon' }, 
+                    component: () => import('./views/goods.vue')
+                },
+            ]
+        },
+    ]
+})

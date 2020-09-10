@@ -1,0 +1,126 @@
+<template>
+    <div class="aside-comp">
+        <el-menu
+            class="custom-menu"
+            @open="handleOpen"
+            @close="handleClose"
+            :collapse="isCollapse"
+            background-color="#333333"
+            text-color="#bbbbbb"
+            active-text-color="#ffffff"
+            :default-active="activeMenu"
+        >
+            <template v-for="route in subSystems[basepath]['menus']">
+                <!-- 菜单有children -->
+                <el-submenu :index="route.url" v-if="route.children" :key="route.url">
+                    <template slot="title">
+                        <svg class="icon-svg" aria-hidden="true">
+                            <use :xlink:href="`#${route.icon}`"></use>
+                        </svg>
+                        <span slot="title">{{route.name}}</span>
+                    </template>
+                    <el-menu-item :index="subroute.url" v-for="subroute in route.children" :key="subroute.url" @click="clickRouter(subroute)">
+                        <!-- <svg class="icon-svg" aria-hidden="true">
+                            <use :xlink:href="`#${subroute.icon}`"></use>
+                        </svg> -->
+                        <span slot="title">{{subroute.name}}</span>
+                    </el-menu-item>
+                </el-submenu>
+                <!-- 无children -->
+                <el-menu-item :index="route.url" :key="route.url" v-else @click="clickRouter(route)">
+                    <svg class="icon-svg" aria-hidden="true">
+                        <use :xlink:href="`#${route.icon}`"></use>
+                    </svg>
+                    <span slot="title">{{route.name}}</span>
+                </el-menu-item>
+            </template>
+        </el-menu>
+    </div>
+</template>
+<script>
+import { mapState } from "vuex";
+export default {
+    name: "aside-comp",
+    data() {
+        return {
+            isCollapse: false,
+        };
+    },
+    computed: {
+        ...mapState({
+            subSystems: state => state.userStore.subSystems,
+            basepath: state => state.basepath,
+            activeMenu: state => state.activeMenu,
+        }),
+    },
+    methods: {
+        handleOpen(key, keyPath) {
+            console.log(key, keyPath);
+        },
+        handleClose(key, keyPath) {
+            console.log(key, keyPath);
+        },
+        // 跳转路由
+        clickRouter(route) {
+            this.$router.push({path: route.url})
+        }
+    },
+};
+</script>
+<style lang="scss" scoped>
+.aside-comp {
+    height: 100%;
+    padding: 15px 0;
+    box-sizing: border-box;
+    background-color: #333333;
+    /deep/.custom-menu {
+        border-right: none;
+        background-color: #333333;
+        .el-menu-item, .el-submenu__title {
+            height: 45px !important;
+            line-height: 45px !important;
+            padding-left: 30px !important;
+            .icon-svg {
+                color: #bbbbbb;
+                vertical-align: -3px; 
+                margin-right: 5px;
+            }
+            span {
+                vertical-align: 1px;
+                font-size: 14px;
+            }
+            .el-submenu__icon-arrow {
+                color: #ffffff;
+                font-weight: bolder;
+                right: 30px;
+                top: 54%;
+                font-size: 14px;
+            }
+        }
+        .el-menu-item {
+            &.is-active {
+                position: relative;
+                background-color: #191818  !important;
+                color: #ffffff !important;
+                .icon-svg {
+                    color: #ffffff  !important;
+                }
+                &::before {
+                    content: '';
+                    position: absolute;
+                    width: 4px;
+                    height: 100%;
+                    top: 0;
+                    left: 2px;
+                    background-color: #fff;
+                }
+            }
+        }
+        .el-menu--inline {
+            .el-menu-item {
+                padding-left: 50px !important;
+            }
+        }
+    }
+}
+</style>

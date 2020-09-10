@@ -1,0 +1,29 @@
+<template>
+    <div class="page-container page-info">
+        <div class="scroll-wrap">
+            <el-scrollbar class="scroll-wrap-bar"></el-scrollbar>
+        </div>
+    </div>
+</template>
+<script>
+import quotationApi from "@/api/quotation-api";
+export default {
+    name: "quotation-view-page",
+    data() {
+        return {};
+    },
+    created() {
+        this.getData()
+    },
+    methods: {
+        /*货物报价单详情 */
+        getData() {
+            const { id } = this.$route.query;
+            quotationApi.findById({ id }).then(res => {
+                const data = res.data.data
+                console.log(data)
+            })
+        },
+    },
+};
+</script>

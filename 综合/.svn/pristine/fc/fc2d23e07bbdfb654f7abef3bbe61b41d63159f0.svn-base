@@ -1,0 +1,10 @@
+<template>
+    <div class="page-container">
+
+    </div>
+</template>
+<script>
+export default {
+    name: 'quotation-info-page'
+}
+</script>

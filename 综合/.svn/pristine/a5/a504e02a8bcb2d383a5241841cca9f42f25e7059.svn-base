@@ -1,0 +1,128 @@
+<template>
+    <div class="page-container page-info">
+        <div class="scroll-wrap">
+            <el-scrollbar class="scroll-wrap-bar">
+                <div class="header-container clearfix">
+                    <div class="btn-wrap">
+                        <el-button class="info-button" size="mini" type="warning" @click="exportExcel">导出</el-button>
+                        <el-button class="info-button" size="mini" type="info" @click="back">返回</el-button>
+                    </div>
+                </div>
+                <div class="contente">
+                    <table class="quotation-table" width="100%" borderColor="#aaaaaa" cellspacing='0' cellpadding="10" border="1">
+                        <thead>
+                            <tr>
+                                <th class="t-header-th" align="center" colspan="6">{{infoForm.name || '-'}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th align="center" colspan="6"></th>
+                            </tr>
+                            <tr>
+                                <th>报价总额</th>
+                                <td>{{infoForm.totalPrice ? `${infoForm.totalPrice} 元` : '/'}}</td>
+                                <th>折扣</th>
+                                <td>{{infoForm.discount ? `${infoForm.discount} 折` : '/'}}</td>
+                                <th>优惠价</th>
+                                <td>{{infoForm.allowance ? `${infoForm.allowance} 元` : '/'}}</td>
+                            </tr>
+                            <tr>
+                                <th align="center" colspan="1">报价日期</th>
+                                <td align="left" colspan="5">{{infoForm.createTime || '/'}}</td>
+                            </tr>
+                            <tr>
+                                <th align="center" colspan="6"><!-- 货物列表 --></th>
+                            </tr>
+                            <tr>
+                                <th width="16%">物品名称</th>
+                                <th width="16%">型号</th>
+                                <th width="16%">数量</th>
+                                <th width="16%">销售价单价</th>
+                                <th width="16%">图片</th>
+                                <th width="17%">参数</th>
+                            </tr>
+                            <tr v-for="good in goodsList" :key="good.id">
+                                <td>{{good.name || '/'}}</td>
+                                <td>{{good.type || '/'}}</td>
+                                <td>{{good.number ? `${good.number} ${good.unit}` : '/'}}</td>
+                                <td>{{good.salesPrice ? `￥${good.salesPrice} 元` : '/'}}</td>
+                                <td>
+                                    <viewimg-comp :options="{image: good.productImgStr, smallImgShow: true, imgHeight: '60px'}" />
+                                </td>
+                                <td>
+                                    <autohigh-textarea-comp v-model="good.tenderParams" :readonly="true" :maxHeight="250" width="250px" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </el-scrollbar>
+        </div>
+    </div>
+</template>
+<script>
+import quotationApi from "@/api/quotation-api";
+export default {
+    name: "quotation-view-page",
+    data() {
+        return {
+            infoForm: {},
+            goodsList: []
+        };
+    },
+    created() {
+        this.getData()
+    },
+    methods: {
+        /*货物报价单详情 */
+        getData() {
+            const { id } = this.$route.query;
+            quotationApi.findById({ id }).then(res => {
+                const data = res.data.data
+                if(data) {
+                    this.infoForm = data
+                    this.goodsList = data.goodsList || []
+                }
+            })
+        },
+        /* 返回至报价管理 */
+        back() {
+            this.$router.push({name: 'quotation-page'})
+        },
+        /* 导出 报价单 */
+        exportExcel() {
+
+        }
+    },
+};
+</script>
+<style lang="scss" scoped>
+    .header-container {
+        .btn-wrap {
+            float: right;
+            margin-right: 50px;
+        }
+    }
+    .contente {
+        margin: 30px auto 30px;
+        min-width: 20.9cm;
+        max-width: 80%;
+        text-align: center;
+        /deep/.quotation-table {
+            .t-header-th {
+                font-size: 16px;
+            }
+            .table-textarea {
+                outline: none;
+                border: none;
+                color: #666666;
+                display: block;
+            }
+            .el-textarea__inner {
+                border: none;
+                padding: 0px;
+            }
+        }
+    }
+</style>

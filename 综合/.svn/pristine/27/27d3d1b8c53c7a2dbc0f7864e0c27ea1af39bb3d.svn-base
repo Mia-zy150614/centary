@@ -1,0 +1,22 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+
+export default new VueRouter({
+    mode: 'history',
+    base: 'office',
+    routes: [
+        { 
+            path: '/', 
+            component: () => import('../../components/layout/index.vue'),
+            children: [
+                {
+                    path: '/apply', 
+                    name: 'apply-page', 
+                    meta: { title: '申请管理', role: 'apply', icon: 'menu_huowu_icon' }, 
+                    component: () => import('./views/apply.vue')
+                },
+            ]
+        },
+    ]
+})

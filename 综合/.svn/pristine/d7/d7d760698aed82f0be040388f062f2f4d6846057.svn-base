@@ -1,0 +1,11 @@
+<template>
+    <div class="page-container">
+
+    </div>
+</template>
+<script>
+export default {
+    /* 合同列表 */
+    name: 'contract-page'
+}
+</script>

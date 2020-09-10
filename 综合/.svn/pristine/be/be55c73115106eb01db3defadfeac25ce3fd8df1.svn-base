@@ -1,0 +1,133 @@
+<template>
+    <div class="page-container">
+        <div class="page-search clearfix">
+            <el-input class="p-s-input" v-model.trim="searchOptions.name" placeholder="请输入报价单名称" size="mini" clearable></el-input>
+            <el-button type="primary" size="mini" class="p-s-btn" @click="getList">搜索</el-button>
+            <div class="p-s-btn-right">
+                <el-button type="success" size="mini" title="新建" @click="add">新建</el-button>
+                <!-- <el-button type="primary" size="mini" title="导出" @click="exportExcel">导出</el-button>
+                <el-button type="warning" size="mini" title="批量导入" @click="importExcel">批量导入</el-button> -->
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="page-content-scroll-warp">
+                <el-scrollbar class="scroll-wrap">
+                    <el-table 
+                        :data="tableData" 
+                        style="width: 100%"
+                        header-cell-class-name="custom-el-table-header-class"
+                        cell-class-name="custom-el-table-cell-class-name"
+                        @selection-change="handleSelectionChange"
+                    >
+                        <el-table-column align="center" type="selection" fixed="left"  v-model.trim="multipleSelection" width="55"></el-table-column>
+                        <el-table-column
+                            align="center"
+                            type="index"
+                            fixed="left"
+                            :index="$indexMethod(0,searchOptions.currentPage,searchOptions.pageSize)"
+                            label="序号"
+                            width="80"
+                        ></el-table-column>
+                        <el-table-column
+                            align="center"
+                            prop="name"
+                            show-overflow-tooltip
+                            label="报价单名称">
+                            <template slot-scope="scope">
+                                 <el-link type="primary" slot="reference" :underline="false">{{scope.row.name}}</el-link>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            align="center"
+                            prop="totalPrice"
+                            show-overflow-tooltip
+                            label="总价(元)"
+                        >
+                            <template slot-scope="scope">
+                                <span style="color: #05c70c" v-if="scope.row.profitMargin == '1'">{{scope.row.totalPrice}}</span>
+                                <span style="color: #ffa500" v-if="scope.row.profitMargin == '2'">{{scope.row.totalPrice}}</span>
+                                <span style="color: #ff8d00" v-if="scope.row.profitMargin == '3'">{{scope.row.totalPrice}}</span>
+                                <span style="color: #ff2f00" v-if="scope.row.profitMargin == '4'">{{scope.row.totalPrice}}</span>
+                                <span style="color: #8c1e05" v-if="scope.row.profitMargin == '5'">{{scope.row.totalPrice}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            align="center"
+                            prop="createUserName"
+                            show-overflow-tooltip
+                            label="报价人"
+                        ></el-table-column>
+                        <el-table-column
+                            align="center"
+                            prop="createTime"
+                            show-overflow-tooltip
+                            label="报价时间"
+                        ></el-table-column>
+                        <el-table-column align="center" label="操作" fixed="right">
+                            <template slot-scope="scope">
+                                <el-link  @click="view(scope.row)" :underline="false" type="warning">详情</el-link>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页器 -->
+                    <div class="page-pagination">
+                        <pagination-comp @currentChange="currentChange" :currentPage="searchOptions.currentPage" :total="searchOptions.total" />
+                    </div>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+import { get_uuid } from '@/utils/validate'
+import quotationApi from "@/api/quotation-api";
+export default {
+    /* 报价单 */
+    name: 'quotation-page',
+    data() {
+        return {
+            multipleSelection: [],
+            searchOptions: {
+                currentPage: 1, //当前页码
+                pageSize: 20, //每页显示条数
+                total: 0,
+                name: '',
+                totalPrice: ''
+            },
+            tableData: [],
+        }
+    },
+    created() {
+        this.getList()
+    },
+    methods: {
+        /* 报价单详情 */
+        view(row) {
+            
+        },
+        /* 获取报价单数据 */
+        getList() {
+            quotationApi.getList(this.searchOptions).then(res => {
+                const data = res.data.data
+                console.log(res.data)
+                if(data) {
+                    this.searchOptions.total = data.total
+                    this.tableData = data.list
+                }
+            }).catch(err => console.log(err))
+        },
+        currentChange(val) {
+            this.searchOptions.currentPage = val;
+            this.getList();
+        },
+        /* table 选择 */
+        handleSelectionChange(rows){
+            this.multipleSelection = rows;
+        },
+        /* 新增报价单 */
+        add() {
+            this.$router.push({name: 'quotation-page-add', query: {cacheId: get_uuid()}})
+        }
+    }
+}
+</script>

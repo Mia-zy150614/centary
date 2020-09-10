@@ -1,0 +1,11 @@
+/* 图片转成base64 */
+
+const image2Base64 = imgUlr => {
+    var canvas = document.createElement("canvas");
+    canvas.width = imgUlr.width;
+    canvas.height = imgUlr.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(imgUlr, 0, 0, imgUlr.width, imgUlr.height);
+    var dataURL = canvas.toDataURL("image/png");
+    return dataURL;
+}

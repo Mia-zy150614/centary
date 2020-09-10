@@ -1,0 +1,19 @@
+import { baseServer } from '../utils/post-request'
+
+class goodsApi {
+    //获取货物列表
+    static getList(data){
+        return baseServer('/goods/list.shtml', data)
+    }
+    //保存货物
+    static save(data){
+        return baseServer('/goods/save.shtml', data)
+    }
+    //获取详情
+    static getById(data){
+        return baseServer('/goods/getById.shtml', data)
+    }
+
+}
+
+export default goodsApi

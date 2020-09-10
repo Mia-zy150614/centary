@@ -1,0 +1,31 @@
+<template>
+    <div class="page-container page-info">
+        <div class="p-i-section">
+            <div class="p-i-title clearfix">
+                <span class="line"></span>
+                <span class="text">角色基本信息</span>
+            </div>
+        </div>
+         <div class="p-i-content">
+            <el-form :model="infoForm" :rules="formRules" ref="infoForm" label-width="100px" class="p-i-form">
+                <div class="p-i-form-item clearfix"></div>
+            </el-form>
+        </div>
+    </div>
+</template>
+<script>
+export default {
+    name: "ruleinfo-page",
+    data() {
+        return {
+            isDisable: false,
+            infoForm: {
+                
+            },
+            formRules: {
+                
+            },
+        }
+    }
+}
+</script>

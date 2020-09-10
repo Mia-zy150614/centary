@@ -1,0 +1,161 @@
+<template>
+    <div class="params-page page-container">
+        <div class="page-search clearfix">
+            <el-input v-model="searchOptions.name" size="mini" class="p-s-input" placeholder="请输入参数名称" clearable></el-input>
+            <el-button type="primary" size="mini" class="p-s-btn" @click="getList">搜索</el-button>
+            <div class="p-s-btn-right">
+                <el-button type="warning" size="mini" title="清除缓存" @click="refresh">清除缓存</el-button>
+                <!-- <el-popover placement="bottom-end" trigger="hover" popper-class="page-search-popover" :visible-arrow="false">
+                    <el-button slot="reference" type="info" size="mini" icon="el-icon-s-grid">操作</el-button>
+                    <ul class="p-s-operating">
+                        <li class="operating-item clearfix" @click="editParams">
+                            <span class="icon-wrap">
+                                <i class="icon-font el-icon-edit"></i>
+                            </span>
+                            <span class="operat-title">编辑</span>
+                        </li>
+                        <li class="operating-item clearfix" @click="refresh">
+                            <span class="icon-wrap">
+                                <i class="icon-font el-icon-refresh"></i>
+                            </span>
+                            <span class="operat-title">清除缓存</span>
+                        </li>
+                        <li class="operating-bg"></li>
+                    </ul>
+                </el-popover> -->
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="page-content-scroll-warp">
+                <el-scrollbar class="scroll-wrap">
+                    <el-table 
+                        :data="tableData" 
+                        style="width: 100%"
+                        header-cell-class-name="custom-el-table-header-class"
+                        cell-class-name="custom-el-table-cell-class-name"
+                        @selection-change="handleSelectionChange"
+                    >
+                        <el-table-column align="center" type="selection"  v-model.trim="multipleSelection" width="55"></el-table-column>
+                        <el-table-column
+                            align="center"
+                            type="index"
+                            fixed
+                            :index="$indexMethod(0,searchOptions.currentPage,searchOptions.pageSize)"
+                            label="序号"
+                            width="80"
+                        ></el-table-column>
+                        <el-table-column
+                            align="center"
+                            prop="kind"
+                            label="参数类型"
+                            show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                            align="center"
+                            prop="name"
+                            label="参数名称"
+                            show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                            align="center"
+                            prop="value"
+                            label="参数值"
+                            show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column
+                            align="center"
+                            prop="remark"
+                            label="备注"
+                            show-overflow-tooltip>
+                        </el-table-column>
+                        <el-table-column align="center" label="操作">
+                            <template slot-scope="scope">
+                                <el-link  @click="editParams(scope.row)" :underline="false" type="warning">编辑</el-link>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页器 -->
+                    <div class="page-pagination">
+                        <pagination-comp @currentChange="currentChange" :currentPage="searchOptions.currentPage" :total="searchOptions.total" />
+                    </div>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+import paramApi from "@/api/param-api";
+export default {
+    name: 'params-page',
+    data() {
+        return {
+            multipleSelection: [],
+            searchOptions: {
+                currentPage: 1, //当前页码
+                pageSize: 20, //每页显示条数
+                total: 0,
+                name:"",
+            },
+            tableData: []
+        }
+    },
+    created() {
+        this.getList()
+    },
+    methods: {
+        //查询列表
+        getList() {
+            paramApi.list(this.searchOptions).then(res => {
+                if (res.data.success) {
+                    this.searchOptions.total =res.data.data.total;
+                    this.tableData = res.data.data.list;
+                }
+            }).catch(err => console.warn(err));
+        },
+        currentChange(val) {
+            this.searchOptions.currentPage = val;
+            this.getList();
+        },
+        /* table 选择 */
+        handleSelectionChange(rows){
+            this.multipleSelection = rows;
+        },
+        /* 参数编辑 */
+        async editParams(row) {
+            this.$confirm(`该操作可能会影响各个子系统的使用，是否继续？`, "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(resolve => {
+                this.$router.push({name: 'params-edit-page', query: { type:'edit', kind: row.kind,name: row.name}})
+            }).catch(err => console.log(err));
+        },
+        //清空缓存
+        refresh(){
+            this.$confirm(`确定要清除系统缓存吗，是否继续？`, "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            }).then(resolve => {
+                paramApi.clearCache().then(res =>{
+                    if(res.data.success) {
+                        this.$notify({
+                            title: "成功",
+                            message: "已清除缓存！",
+                            type: "success",
+                            duration: 2000
+                        });
+                    } else {
+                        this.$notify({
+                            title: "失败",
+                            message: "清除缓存失败！",
+                            type: "warning",
+                            duration: 2000
+                        });
+                    }
+                }).catch(err => console.log(err))
+            }).catch(err => console.log(err));
+        },
+    }
+}
+</script>

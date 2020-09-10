@@ -1,0 +1,42 @@
+<template>
+    <div class="page-container">
+        <div class="page-search clearfix">
+            <el-input v-model="searchOptions.name" size="mini" class="p-s-input" placeholder="请输入合同名称" clearable></el-input>
+            <el-button type="primary" size="mini" class="p-s-btn" @click="getList">搜索</el-button>
+            <div class="p-s-btn-right">
+                <el-button type="success" size="mini" title="新增合同" @click="add()">新增合同</el-button>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+import contractApi from '@/api/contract-api'
+export default {
+    /* 合同列表 */
+    name: 'contractlist-page',
+    data() {
+        return {
+            multipleSelection: [],
+            searchOptions: {
+                currentPage: 1, //当前页码
+                pageSize: 20, //每页显示条数
+                total: 0,
+                applyType:"",
+            },
+            tableData: []
+        }
+    },
+    created() {
+        this.getList()
+    },
+    methods: {
+        /* 获取合同数据 */
+        getList() {
+            
+        },
+        add(){
+            this.$router.push({name:'contractlist-page-add'})
+        }
+    }
+}
+</script>

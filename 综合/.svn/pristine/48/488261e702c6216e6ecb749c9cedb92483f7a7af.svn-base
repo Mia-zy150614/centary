@@ -1,0 +1,178 @@
+<template>
+    <div class="page-container">
+        <div class="page-search clearfix">
+            <el-input v-model="searchOptions.name" size="mini" class="p-s-input" placeholder="请输入合同名称" clearable></el-input>
+            <el-button type="primary" size="mini" class="p-s-btn" @click="getList">搜索</el-button>
+            <div class="p-s-btn-right">
+                <el-button type="success" size="mini" @click="add">模板新增</el-button>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="page-content-scroll-warp">
+                <el-scrollbar class="scroll-wrap">
+                    <el-table
+                        :data="tableData"
+                        style="width: 100%"
+                        header-cell-class-name="custom-el-table-header-class"
+                        cell-class-name="custom-el-table-cell-class-name"
+                        @selection-change="handleSelectionChange"
+                    >
+                        <el-table-column align="center" type="selection"  v-model.trim="multipleSelection" width="55"></el-table-column>
+                        <el-table-column
+                            align="center"
+                            type="index"
+                            fixed
+                            :index="$indexMethod(0,searchOptions.currentPage,searchOptions.pageSize)"
+                            label="序号"
+                            width="80">
+                        </el-table-column>
+                        <el-table-column align="center" prop="name" label="合同名称" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                 <el-link type="primary" slot="reference" :underline="false">{{scope.row.name}}</el-link>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" prop="type" label="合同类型" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="createUserName" label="拟订人" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="cheackUser" label="复核人" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="createTime" label="拟订时间" show-overflow-tooltip></el-table-column>
+                        <el-table-column align="center" prop="status" label="状态">
+                            <template slot-scope="scope">
+                                <span class="table-column-success" v-if="scope.row.status === 1">停用中</span>
+                                <span class="table-column-fail" v-if="scope.row.status === 0">启用中</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" label="操作" fixed="right" width="210">
+                            <template slot-scope="scope">
+                                <el-link  @click="edit(scope.row)" :underline="false" type="warning">编辑</el-link>
+                                <el-divider direction="vertical"></el-divider>
+                                <el-link  @click="runOrstop(scope.row)" :underline="false" type="danger" v-if="scope.row.status === 1">规则(启用)</el-link>
+                                <el-link  @click="runOrstop(scope.row)" :underline="false" type="success" v-if="scope.row.status === 0">规则(停用)</el-link>
+                                <el-divider direction="vertical"></el-divider>
+                                <el-link  @click.stop="del(scope.row)" :underline="false" type="danger">删除</el-link>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页器 -->
+                    <div class="page-pagination">
+                        <pagination-comp @currentChange="currentChange" :currentPage="searchOptions.currentPage" :total="searchOptions.total" />
+                    </div>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+import contractApi from '@/api/contract-api'
+export default {
+    /* 合同模板 */
+    name: 'contracttemplate-page',
+    data() {
+        return {
+            multipleSelection: [],
+            searchOptions: {
+                currentPage: 1, //当前页码
+                pageSize: 20, //每页显示条数
+                total: 0,
+                name: ''
+            },
+            tableData: []
+        }
+    },
+    created() {
+        this.getList()
+    },
+    methods: {
+        /* 获取合同数据 */
+        getList() {
+            contractApi.list(this.searchOptions).then(res => {
+                const data = res.data.data.list
+                if(data.length){
+                    this.tableData = data
+                }
+            })
+        },
+        /* 新增合同模板 */
+        add() {
+            this.$router.push({name: 'contracttemplate-page-add'})
+        },
+        /* 合同模板编辑 */
+        edit(row) {
+            
+        },
+        /* 删除合同模板 */
+        del(row) {
+            this.$confirm(`模板合同请谨慎删除, 是否继续?`, '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(res => {
+                contractApi.delete({id:row.id}).then(res => {
+                    if (res.data.success) {
+                        this.getList();
+                        this.$notify({
+                            title: "成功",
+                            message: "删除成功",
+                            type: "success",
+                            duration: 2000,
+                        });
+                    } else {
+                        this.$notify({
+                            title: "删除失败",
+                            message: res.data.msg,
+                            type: "warning",
+                            duration: 2000,
+                        });
+                    }
+                }).catch( err => {
+                    console.log(err)
+                })
+            }).catch(err => console.log(err))
+        },
+        // 规则启用或停用
+        async runOrstop(row) {
+            const confirmMsg = row.status === 1 ? '停用' : '启用'
+            console.log(row.status,confirmMsg)
+            this.$confirm(`确定要${confirmMsg}该合同吗, 是否继续?`, '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(res => {
+                let status = row.status === 0?1:0
+                // console.log(status)
+                const params ={
+                    id:row.id,
+                    status:status
+                }
+                contractApi.save(params).then(res => {
+                    if (res.data.success) {
+                        this.getList()
+                        this.$notify({
+                            title: "成功",
+                            message: "修改成功",
+                            type: "success",
+                            duration: 1000,
+                        });
+                    } else {
+                        this.$notify({
+                            title: "修改失败",
+                            message: res.data.msg,
+                            type: "warning",
+                            duration: 1000
+                        });
+                    }
+                }).catch(err => {
+                    console.log(err)
+                })
+            }).catch(err => console.log(err))
+        },
+        /* table 选择 */
+        handleSelectionChange(rows){
+            this.multipleSelection = rows;
+        },
+        currentChange(val) {
+            this.searchOptions.currentPage = val;
+            this.getList();
+        },
+    }
+}
+</script>
